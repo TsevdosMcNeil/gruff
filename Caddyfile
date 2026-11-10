@@ -1,79 +1,60 @@
-# Caddyfile — LOCAL development (mkcert TLS, explicit port :8080)
+# Caddyfile — Gruff (headless WordPress + React)
 #
-# All three hostnames share ONE mkcert certificate AND one HTTPS port.
-# The hostnames comes from Caddy's environment as {$CADDY_HOSTNAME} (fed from .env
-# via docker-compose), with default.localhost as the fallback default.
-# The port comes from Caddy's environment as {$WORDPRESS_SSL_PORT} (fed from .env
-# via docker-compose), with 8080 as the fallback default.
+#   https://{$CADDY_HOSTNAME}:{$WORDPRESS_SSL_PORT}/       -> React dev server (node service)
+#   https://{$CADDY_HOSTNAME}:{$WORDPRESS_SSL_PORT}/api/   -> WordPress (API at /api/wp-json, CMS login at /api/<slug>)
+#   https://pma.{$CADDY_HOSTNAME}:{$WORDPRESS_SSL_PORT}/   -> phpMyAdmin
 #
-# Generate the cert once from the project root:
-#   mkcert -install
-#   mkdir -p certs
-#   mkcert -cert-file certs/local.pem -key-file certs/local-key.pem \
-#     default.localhost \
-#     pma.default.localhost
-#
-# *.localhost resolves to 127.0.0.1 in Chrome/Firefox. On Safari, or if it fails,
-# add to /etc/hosts:
-#   127.0.0.1  default.localhost pma.default.localhost
+# Same layout as the live site, so the front end and the API share one origin (no CORS).
+{
+	# Local mkcert certificates only: no ACME, no HTTP->HTTPS redirect listener
+	auto_https disable_redirects
 
-# --- WordPress  ---
-https://{$CADDY_HOSTNAME:default.localhost}:{$WORDPRESS_SSL_PORT:8080} {
-	tls /etc/caddy/certs/local.pem /etc/caddy/certs/local-key.pem
-	encode zstd gzip
-
-  # --- Uploads routing from production server ---
-  # Everything under uploads (match all medial)
-  #@remoteUploads path /wp-content/uploads/*
-
-  # Proxy uploads to production
-  #handle @remoteUploads {
-  #  root * /var/www/html
-  #  # Optional: allow <img> hotlinking to work from your dev pages
-  #  # (not needed for plain <img>, but helpful for JS fetch/CORS)
-  #  header Access-Control-Allow-Origin *
-  #
-  #  # Serve locally if the file exists on disk...
-  #  @localFile file
-  #  handle @localFile {
-  #    # 'file_server' is the handler that serves static files straight off disk
-  #    file_server
-  #  }
-  #  # ...otherwise fall back to production
-  #  handle {
-  #    reverse_proxy https://{$CADDY_PRODUCTION_DOMAIN:default.com} {
-  #      # Make upstream treat it as first-party
-  #      header_up Host {$CADDY_PRODUCTION_DOMAIN:default.com}
-  #      # This line is deprecated because reverse_proxy already sets X-Forwarded-Host to the incoming host by default.
-  #      #header_up X-Forwarded-Host {host}
-  #      header_up X-Forwarded-Proto https
-  #      # Strip any referrer to avoid hotlink rules
-  #      header_up -Referer
-  #    }
-  #  }
-  #}
-
-  # Sage: Vite HMR + internal module paths
-  @vite {
-    path /@vite/*
-    path /@id/*
-    path /@fs/*
-    path /resources/*
-    path /node_modules/*
-  }
-  reverse_proxy @vite {$NODE_CONTAINER:sage_node}:{$NODE_PORT:5173}
-
-  # Sage is requesting via your base path:
-  @vitebase path {$VITE_PATH:/wp-content/themes/codigo/public/build/*}
-  reverse_proxy @vitebase {$NODE_CONTAINER:sage_node}:{$NODE_PORT:5173}
-
-  # Everything else → local WordPress
-  reverse_proxy wordpress:80
+	# Plain http:// on the HTTPS port (typed URL, or a redirect from Apache, which
+	# doesn't know it's behind HTTPS) gets redirected to https:// on the same port,
+	# instead of "Client sent an HTTP request to an HTTPS server".
+	servers {
+		listener_wrappers {
+			http_redirect
+			tls
+		}
+	}
 }
 
-# --- phpMyAdmin ---
-https://pma.{$CADDY_HOSTNAME:default.localhost}:{$WORDPRESS_SSL_PORT:8080} {
+{$CADDY_HOSTNAME}:{$WORDPRESS_SSL_PORT} {
 	tls /etc/caddy/certs/local.pem /etc/caddy/certs/local-key.pem
-	encode zstd gzip
+	encode gzip
+
+	# /api -> /api/
+	redir /api /api/ 308
+
+	# Media: serve the local copy if it exists, otherwise fetch it from the live site.
+	# (The live site only answers on http, so the upstream is http://.)
+	handle /api/wp-content/uploads/* {
+		root * /srv
+		@local file
+		handle @local {
+			file_server
+		}
+		handle {
+			reverse_proxy http://{$CADDY_PRODUCTION_DOMAIN} {
+				header_up Host {upstream_hostport}
+			}
+		}
+	}
+
+	# WordPress (REST API, CMS, assets). Path is passed through unchanged:
+	# WordPress itself lives in /api inside the container.
+	handle /api/* {
+		reverse_proxy wordpress:80
+	}
+
+	# Everything else: the React app (client-side routes, hot-reload websocket)
+	handle {
+		reverse_proxy {$NODE_CONTAINER}:{$NODE_PORT}
+	}
+}
+
+pma.{$CADDY_HOSTNAME}:{$WORDPRESS_SSL_PORT} {
+	tls /etc/caddy/certs/local.pem /etc/caddy/certs/local-key.pem
 	reverse_proxy phpmyadmin:80
 }

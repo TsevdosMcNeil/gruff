@@ -1,0 +1,527 @@
+
+@import './_fonts';
+@import './_color';
+@import './_mixin';
+@import './_reset';
+@import './_breakpoints';
+@import './_owl';
+
+// MIXIN FOR GRUFF
+@mixin gap(){padding:60px 120px;}
+
+// BUTTON
+.btn-rightarrow{display: inline-block; font-size: $f-reg; color: inherit; position: relative; padding-right: 44px; @include transition(0.5s);
+    &::before, &::after{content:''; display: inline-block; position: absolute; }
+    &::before{width: 36px; height: 1px; background-color: currentColor; right: -1px; top: 10px;}
+    &::after{width: 12px; height: 12px; @include transform(rotate(45deg)); border-color: currentColor; border-style:solid; border-width:1px 1px 0 0; top: 5px; right: 0px;}
+    &:hover{padding-right: 55px; @include transition(0.5s);
+        &::before{background-color: color(ral); }
+        &::after{border-color: color(ral);}
+    }
+}
+
+.btn-rightarrowHover{
+    &:hover{
+        .btn-rightarrow{padding-right: 55px; @include transition(0.5s);
+            &::before{background-color: color(ral); }
+            &::after{border-color: color(ral);}
+        }
+    }
+}
+
+.btn-scrollUp, .btn-scrollDown{display: inline-block; position: absolute;
+    span{display: inline-block; width: 45px; height: 45px; @include transform(rotate(45deg));}
+}
+.btn-scrollUp{z-index: 333;
+    span{border-left: 3px solid color(white); border-top: 3px solid color(white);}
+    &:hover{bottom: 40px;}
+}
+
+.btn-scrollDown{bottom: 50px; left:50%; z-index: 333;  @include transform(translateX(-50%));
+    span{border-right: 3px solid color(white); border-bottom: 3px solid color(white);}
+    &:hover{bottom: 40px;}
+}
+
+// ANIMATION
+@keyframes anim-hamBefore{
+    0%{left: -10px;}
+    50%{left: 0px;}
+    100%{left:0px; transform:rotate(45deg); -webkit-transform:rotate(45deg); -moz-transform:rotate(45deg); -ms-transform:rotate(45deg); -o-transform:rotate(45deg); }
+}
+
+@keyframes anim-hamAfter{
+    0%{right: -10px;}
+    50%{right: 0px;}
+    100%{right:0px; transform:rotate(-45deg); -webkit-transform:rotate(-45deg); -moz-transform:rotate(-45deg); -ms-transform:rotate(-45deg); -o-transform:rotate(-45deg); }
+}
+
+.gruff-CenterLogo{@include centerXY(); z-index: 1; text-align: center; width: 690px;
+    img{max-width: 100%;}
+}
+
+.screenfluid-left{width: 50%; height: 100vh; min-height: 600px; float: left;}
+.screenfluid-right{width: 50%; height: 100vh; min-height: 600px; float: right;}
+
+.screenfluid-left,
+.screenfluid-right{
+    img{@include object(cover, center);}
+}
+
+.screen-left{width: 50%; float: left;}
+.screen-right{width: 50%; float: right;}
+
+.items-3{
+    li, & > div{@include grid(3, 3%); margin-top: 30px;
+        &:nth-child(3n+3){margin-right: 0px;}
+        &:nth-child(-n+3){margin-top: 0px;}
+    }
+}
+
+.items-4{
+    li, & > div{@include grid(4, 2%); margin-top: 30px;
+        &:nth-child(4n+4){margin-right: 0px;}
+        @media(max-height:870px){margin-top: 10px;}
+    }
+}
+
+// HEADER
+.gruff-HeaderLogo{width:auto; display: inline-block;
+    img{width: 118px; height: 65.42px; display: block;}
+}
+
+.gruff-Header{width: 48%; height: 100%; float: left; background-color: color(white); position: fixed; top: 0px; left: 0px; z-index: 9999; @include transform(translateX(calc(-100% + 60px))); @include transition(transform 400ms);
+    &.gruff-HeaderOpac{opacity: 0;}
+    &:hover{@include transform(translateX(calc(-100% + 100px))); @include transition(transform 400ms);
+        .hammenu{width: 100px;
+            span{
+                &::before{left: 0px;}
+                &::after{right: 0px;}
+            }
+        }
+    }
+    &.is-open{width: 50%; @include transform(translateX(0%)); @include transition(transform 400ms);}
+
+    .hammenu{width: 60px; height: 100%; float: right; position: relative; cursor: pointer;
+        span{display: inline-block; width: 2.835px; height: 26px; background-color: color(rgrey); @include centerY(); right: 28px;
+            &::before, &::after{content: ''; width: 100%; height: 100%; background-color: color(rgrey); position: absolute; top:0px; @include transition(0.4s);}
+            &::before{left:-10px;}
+            &::after{right: -10px;}
+        }
+        &::after{font-size: 12px; @include centerY(); @include transform(translateY(calc(-50% + 29px))); right: 12px;}
+        &.is-actv{
+            span{background-color: transparent;
+                // &::before, &::after{width:30.996px; height:2.835px; }
+                &::before{animation:anim-hamBefore 0.3s linear forwards; -webkit-animation:anim-hamBefore 0.3s linear forwards;}
+                &::after{animation:anim-hamAfter 0.3s linear forwards; -webkit-animation:anim-hamAfter 0.3s linear forwards;}
+            }
+            //&::after{content:'CLOSE';}
+        }
+    }
+    .gruff-HeaderContent{width: calc(100% - 60px); height: 100%; overflow: auto; float: left; padding: 60px 120px; @include flex(); @include flex-direction(column); @include justify-content(space-between); position: absolute; left:0px; top:0px; z-index:-1;
+        .gruff-nav{width: auto; position: relative;
+            .gruff-menu{
+                li{font-size: $f-md;
+                    a{line-height: 32px;
+                        &::after{bottom:4px;}
+                    }
+                }
+            }
+
+            .gruff-Cinfo{position: absolute; top: calc(100% + 100px); left: 0px; margin-top: 0px;
+                li{
+                    &:first-child{margin-top: 0px;}
+                    &:nth-child(3){margin-top: 25px;}
+                    a{line-height: 22px;
+                        &::after{bottom:2px;}
+                    }
+                }
+                @media(max-height:900px){position: static; top: auto; left: auto; margin-top: 50px;}
+            }
+        }
+        .gruff-Finfo{
+            li{font-size: $f-sm !important;
+                a{line-height: 16px;}
+            }
+        }
+        .gruff-nav, .gruff-Finfo{width: 100%; float: left;
+            ul, li{width: 100%; float: left; list-style: none; font-size: $f-reg;
+                &:first-child{margin-top: 0px;}
+                a{display:inline-block; color: inherit; font-size: inherit; padding-bottom: 0; position: relative;
+                    &::after{content: ''; width: calc(100% - 2px); height: 1px; position: absolute; right: 2px; z-index: -1; background-color: color(ral);  opacity: 0; @include transition(0.4s cubic-bezier(.55,0,.1,1));}
+                    &:hover, &.nav-actv{
+                        &::after{opacity: 1; @include transition(0.4s cubic-bezier(.55,0,.1,1));}
+                    }
+                }
+            }
+        }
+    }
+}
+
+.title{line-height: 34px; font-size: $f-md;
+    p{font-size: inherit !important; line-height: inherit !important; margin-bottom: 50px;
+        &:last-child{margin-bottom: 0px;}
+    }
+}
+.titlelg{
+    // line-height: 53px; font-size: 44px; margin-bottom: 50px;
+    line-height: 6.5vh; font-size: 5vh; margin-bottom: 4vh;
+    &:last-child{margin-bottom: 0px;}
+}
+.titlehg{font-size: $f-hg;}
+.desc{font-size: $f-reg; line-height:23px;
+    p{font-size: inherit !important; line-height: inherit !important; margin-bottom: 23px;
+        &:last-child{margin-bottom: 0px;}
+    }
+}
+
+
+// HOME PAGE
+.gruff--Home{
+    .gruff-HomeBanner{background-color: color(rgrey); position: relative;}
+    .owl-item{
+        .img-container{width: 50%; height: 100vh; float: left;
+            img{@include object(cover, center);}
+        }
+        &:nth-child(odd){
+            .img-container{float: right;}
+        }
+    }
+}
+
+// CONTACT US PAGE
+.gruff--Contact{@include gap();
+    .gruff-Content{width: 100%; height: calc(100vh - 120px); @include flex(); @include flex-direction(column); @include justify-content(flex-end);
+        .screen-left, .screen-right{padding:110px 100px;}
+        @media(max-height:760px){
+            .screen-left, .screen-right{padding:35px 0px 0px 100px;}
+        }
+    }
+    .gruff-Cinfo{margin-top: 10px;
+        li{margin-top: 3px; list-style: none; font-size: inherit; color: inherit;
+            &:first-child{margin-top: 0px;}
+            a{display:inline-block; color: inherit; font-size: inherit; position: relative;
+                &::after{content: ''; width: calc(100% - 2px); height: 1px; position: absolute; bottom: 4px; right: 2px; z-index: -1; background-color: color(ral);  opacity: 0; @include transition(0.4s cubic-bezier(.55,0,.1,1));}
+                &:hover{
+                    &::after{opacity: 1; @include transition(0.4s cubic-bezier(.55,0,.1,1));}
+                }
+            }
+        }
+    }
+}
+
+
+// STORIES LISTING
+.gruff--Stories{background-color: color(story); 
+    .gruff-StoriesInner{@include gap(); height: 100%; @include flex(); @include flex-direction(column); @include justify-content(space-between); @include align-items(flex-start);}
+    .gruff-AllStories{
+        // margin-top: 60px;
+        .item{position: relative;
+            .img-container{width: 33%; float: left;
+                img{max-width: 100%; max-height: 42vh;}
+            }
+            .content-container{width: 48%; height: 100%; float: right; position: absolute; top: 0px; left: 37%; @include flex(); @include flex-direction(column); @include justify-content(space-between); @include align-items(flex-start);
+                h6{margin-bottom: 15px;}
+            }
+            @media(max-width:$tm){
+                .img-container{width: 48%;}
+                .content-container{width: 47%; left: auto; right: 0px;}
+            }
+        }
+    }
+}
+
+// PRACTICE AND PEOPLE
+.gruff--Practice-People{
+    & > div{width: 100%; float: left; min-height: 100vh; }
+    .gruff-PPCarousel{background-color: color(rgrey); position: relative;
+        .owl-item{
+            .img-container{width: 50%; height: 100vh; float: left;
+                img{@include object(cover, center);}
+            }
+            &:nth-child(odd){
+                .img-container{float: right;}
+            }
+        }
+    }
+    .gruff-PPContent{height: 100%; padding:30px 300px 30px 120px; @include flex(); @include flex-direction(column); @include justify-content(center);
+        @media(max-height:800px){
+            padding:30px 30px 30px 120px;
+        }
+    }
+    .gruff-People{@include gap();
+        .gruff-PeopleRow{
+            &:first-child{
+                .gruff-PeopleCol .item{margin-top: 0px;}
+            }
+            &:last-child{margin-bottom: 0px;}
+            *{font-size: $f-reg;
+                @media(max-height:870px){font-size: 16px;}
+            }
+            .img-container{margin-bottom: 10px; opacity: 0.8; @include transition(0.3s);
+                img{@include object(cover, center); height: 21vh;}
+            }
+            p{margin-top: 3px;}
+            .gruff-PeopleCol{@include flex(); @include flex-direction(row); @include justify-content(flex-start); @include align-items(stretch); @include flex-wrap(wrap);
+                .item{width:25%; padding-right: 2%; float: left; margin-top: 25px; cursor: pointer; overflow: hidden; @include transition(0.4s);
+                    &:hover{
+                        .img-container{opacity: 1; ; @include transition(0.3s);}
+                    }
+                    &.is-showing{overflow: visible;
+                        .item-cover{opacity: 1; visibility: visible; @include transition(opacity 1s linear);}
+                    }
+                }
+            }
+        }
+        .item-cover{width:100%; height: 100%; position: absolute; top: 0; left: 0px; z-index:1; opacity: 0; visibility: hidden; @include transition(opacity 1s linear); @include gap(); cursor: default;
+            &::after{content: ''; width:100%; height: 100%; position: absolute; top: 0px; left: 0px; z-index: -1; background-color: rgba(color(rgrey), 0.95); pointer-events: none;} 
+            .people-dtls{margin-top: 15px;
+                p{margin-bottom: 20px; line-height: 26px;}
+            }
+            & > div{height: 100%;}
+            .screenfluid-left{padding-right: 60px;}
+            .screenfluid-right{padding-left: 60px; position: relative;
+                &::before, &::after{content: ''; width: 2.835px; height: 26px; background-color: #807d7d; position: absolute; top:-40px; right: -80px; @include transition(0.4s); cursor: pointer;}
+                &::before{@include transform(rotate(45deg));}
+                &::after{@include transform(rotate(-45deg));}
+            }
+        }
+        &.has-is-showing{
+            .gruff-PeopleRow .item:not(.is-showing){opacity: 0.25; @include transition(opacity 0.2s ease-out); @include transition-delay(0.2s);}
+        }
+    }
+    .section{
+        &.people{
+            .btn-scrollUp, .btn-scrollDown{@include transform(translateX(0)); right: 60px; left: auto;
+                span{border-color: color(rgrey); width: 20px; height: 20px; border-width: 1.5px;}
+            }
+            .btn-scrollUp{top:60px;}
+            .btn-scrollDown{bottom:60px;}
+        }
+    }    
+}
+
+
+// RECENT PROJECTS
+.gruff-RecentProjects{
+    a{color: inherit;
+        &:hover{
+            .title::after{opacity: 1; @include transition(0.4s cubic-bezier(.55,0,.1,1));}
+        }
+    }
+    .secTitle{margin-bottom: 30px;}
+    .img-container{
+        img{width: 100%;}
+    }
+    .title{display: inline-block; font-size: $f-nor; margin-top: 10px; color: inherit; position: relative; line-height: normal;
+        &::after{content: ''; width: calc(100% - 2px); height: 1px; position: absolute; bottom: 1px; right: 2px; z-index: -1; background-color: color(ral);  opacity: 0; @include transition(0.4s cubic-bezier(.55,0,.1,1));}
+    }
+}
+
+.gruff-ViewIcons{width: auto; 
+    a{display: inline-block; position: relative;
+        &:after{content: attr(data-title); color: inherit; font-size: 12px; width: 100%; text-align: center; position: absolute; top: 104%; left: 0px; opacity: 0; @include transition(0.3s);}
+        &.grid-view{margin-left: 30px;}
+        &:hover{
+            &:after{opacity: 1; @include transition(0.3s);}
+        }
+    }
+}
+
+// COMMON FOR PROJECT LIST AND DETAILS
+.gruff-ProjectsGrid, .gruff--ProjectDetails{
+    .screenfluid-left{
+        @include gap();
+        @include flex();
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        @include align-items(flex-start);
+    }
+    .projectInfo{
+        *{color: color(white);}
+        & > *{margin-bottom: 28px;
+            &:last-child{margin-bottom: 0px;}
+        }
+    }
+}
+
+
+// PROJECTS LIST
+.gruff-ProjectsGrid{
+    .screenfluid-left{position: relative; cursor: pointer; z-index: 11;
+        @include transition(background-color 0.5s linear);
+        .projectInfo{
+            *{color: color(white);}
+            & > *{margin-bottom: 28px;
+                &:last-child{margin-bottom: 0px;}
+            }
+        }
+        & > *{position: relative; z-index: 3;}
+        &::after{content:''; width: 100%; height: 100%; background-color: currentColor; position: absolute; top: 0px; left: 0px; z-index: 1; @include transition(width 0.8s ease-in-out); pointer-events: none;}
+        &.is-projDtlsLoading{z-index: 999;
+            &::after{width: 200%; @include transition(width 0.8s ease-in-out); }
+        }
+    }
+
+    .screenfluid-right{position: relative; z-index: 99;
+        .gruff-ViewIcons{position: absolute; top: 60px; right: 120px; z-index: 1;}
+        .btn-scrollDown{left:0;}
+    }
+}
+
+.gruff-ProjectsList{
+    @include gap();
+    .gruff-HeaderLogo{float: left;}
+    .gruff-ViewIcons{float: right;}
+    .gruff-MasonryProjectList{
+        .item{display: inline-block; position: relative; color: #676666; font-size: 35px;
+            img{max-width: 100%;}
+            h6{width: 100%; height: 100%; position: absolute; top: 0px; left: 0px; background-color: rgba(color(white), 0.7); padding: 20px; opacity: 0; @include transition(0.5s);}
+            &:hover{
+                h6{opacity: 1; @include transition(0.5s);}
+            }
+        }
+    }
+}
+
+.gruff-MasonryProjectList{
+    @include flex();
+    margin-top: 40px;
+    .grid_column {
+        padding-right: 40px;
+        &:last-child{padding-right: 0px;}
+    }
+      
+    .grid_column > * {
+        background: grey;
+        margin-bottom: 40px;
+        &:last-child{margin-bottom: 0px;}
+    }
+}
+
+// FULL PAGE STYLE
+// html.auto-scroll{overflow: auto !important; height: auto !important;
+//     body{overflow: auto !important; height: auto !important;}
+//     .fp-completely{
+//         & + .section{display: none;}
+//         .fp-tableCell{overflow: auto;}
+//     }
+// }
+
+.fullpage-wrapper{
+    width: 100%;
+    float: left;
+    .section{width: 100%; float: left;}
+    .fp-tableCell{width: 100%; float: left;}
+}
+
+.fullpage-wrapper{
+    width: 100%;
+    float: left;
+    transition:transform 500ms cubic-bezier(0.23, 1, 0.32, 1) !important;
+    -webkit-transition:transform 500ms cubic-bezier(0.23, 1, 0.32, 1) !important;
+    -moz-transition:transform 500ms cubic-bezier(0.23, 1, 0.32, 1) !important;
+    -ms-transition:transform 500ms cubic-bezier(0.23, 1, 0.32, 1) !important;
+    -o-transition:transform 500ms cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+
+.gruff--ProjectDetails{position: relative;
+    .gruff-Layout{height: 100%;
+        &:not(.layout1){@include gap();}
+        .caption{width: 100%; float: left; font-size: $f-nor; margin-top: 10px;}
+        .fulidImg-container{height: 100%;
+            img{max-width: 100%; max-height: 98%;}
+        }
+
+        &.layout1{position: relative;
+            .fulidImg{@include object(cover, center);}
+            .screenfluid-left{position: absolute; top: 0px; left: 0px;
+                .projectInfo{margin-bottom: 61px;}
+            }
+        }
+        &.layout2{
+            .content-container{width: 48%; float: left;}
+            .fulidImg-container{width: 48%; float: right;
+                text-align: right;
+            }
+        }
+        &.layout3{
+            img{max-width: 100%; max-height: 98%;}
+            div{width: 100%; float: left; height: 50%;
+                &:last-child{float: right; text-align: right;}
+            }
+        } 
+        &.layout4{
+            .content-container{width: 46%; float: right;}
+            .fulidImg-container{width: 48%; float: left;}
+        }  
+    }
+
+    .fadingOverlay{height: 100vh; position: absolute; top: 0px; left: 0px; z-index: 3333; opacity: 1; pointer-events: none;
+        .gruff-ProjectsGrid{
+            .screenfluid-left{
+                .titlelg{margin-bottom: 61px;}
+                &::after{width: 200%; }
+            }
+        }
+    }
+    &.is-fading{
+        .fadingOverlay{opacity: 0; @include transition(opacity 3s linear 0.6s);}
+    }
+    .fullpage-wrapper .section:last-child{
+        &.active{
+            .fp-tableCell{ overflow: auto !important;}
+        }
+    }
+    .gruff-RecentProjects{
+        @include gap();
+    }
+}
+
+.gruff--StoryDetails{
+    .gruff-Layout{height: 100%; @include gap();
+        &:not(.layout1){background-color: #edecec; }
+        .fulidImg-container{height: 100%;
+            img{max-width: 100%; max-height: 96%;}
+        }
+        .caption{width: 100%; float: left; font-size: $f-nor; margin-top: 10px;}
+        &.layout1{position: relative; background-color: color(rgrey);
+            *{color: color(white);}
+            .gruff-HeaderLogo{position: absolute; left: 120px; top: 60px;}
+            .content-container, .img-container{padding: 70px 0px 120px 0px; height: 100%; }
+            .content-container{float: left; width: 45%;
+                @include flex();
+                @include flex-direction(column);
+                @include justify-content(flex-end);
+                @include align-items(flex-start);
+                & > * {margin-top: 28px;}
+            }
+            .img-container{text-align: right; float: right; width: 50%;
+                img{max-width: 100%; max-height: 100%;}
+                @include flex();
+                @include flex-direction(column);
+                @include justify-content(center);
+                @include align-items(center);
+            }
+        }
+        &.layout2, &.layout4{height: 100%; @include flex(); @include flex-direction(column); @include justify-content(center);
+            @media(max-height:800px){
+                padding:30px 30px 30px 120px;
+            }
+        }
+       &.layout3{
+            img{max-width: 100%; max-height: 98%;}
+            .fulidImg-container{width: 49%; float: left;
+                &:last-child{float: right; text-align: right;}
+            }
+        } 
+    }
+}
+
+// .fp-viewing-2{overflow: auto !important; 
+//     .fullpage-wrapper{ transform: translate3d(0px, -1800px, 0px) !important; transition: all 0ms ease 710ms !important; -webkit-transform: translate3d(0px, -1800px, 0px) !important; -moz-transform: translate3d(0px, -1800px, 0px) !important; -ms-transform: translate3d(0px, -1800px, 0px) !important; -o-transform: translate3d(0px, -1800px, 0px) !important; -webkit-transition: all 0ms ease 710ms !important; -moz-transition: all 0ms ease 710ms !important; -ms-transition: all 0ms ease 710ms !important; -o-transition: all 0ms ease 710ms !important; }
+//     .gruff--Practice-People{
+//         .fp-completely{overflow: auto !important; height: auto !important;
+//             .fp-tableCell{overflow: auto !important; height: auto !important;}
+//         }
+//     }
+// }

@@ -1,0 +1,32 @@
+// @font-face {font-family: "Avenir Next Regular";
+//     src: url("./fonts/avenir/f3df85918e3f1ba8a7b13be9b47882ce.eot"); /* IE9*/
+//     src: url("./fonts/avenir/f3df85918e3f1ba8a7b13be9b47882ce.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+//     url("./fonts/avenir/f3df85918e3f1ba8a7b13be9b47882ce.woff2") format("woff2"), /* chrome、firefox */
+//     url("./fonts/avenir/f3df85918e3f1ba8a7b13be9b47882ce.woff") format("woff"), /* chrome、firefox */
+//     url("./fonts/avenir/f3df85918e3f1ba8a7b13be9b47882ce.ttf") format("truetype"), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+//     url("./fonts/avenir/f3df85918e3f1ba8a7b13be9b47882ce.svg#Avenir Next Regular") format("svg"); /* iOS 4.1- */
+// }
+
+
+@font-face {
+    font-family: 'Avenir Next LT Pro';
+    src: url('./fonts/avenir/AvenirNextLTPro-Regular.woff2') format('woff2'),
+        url('./fonts/avenir/AvenirNextLTPro-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+@mixin font($weight){
+    @if $weight == 'av'{font-family: 'Avenir Next LT Pro';}
+}
+
+
+// FONT SIZE
+$f-hg: 65px;
+//$f-lg: 46px;
+$f-lg: 44px;
+$f-md: 28px;
+$f-reg: 18px;
+$f-nor: 16px;
+$f-sm: 14px;

@@ -1,56 +1,43 @@
 # docker-compose.yml
 services:
+  # React front end (Create React App, react-scripts 1.x): dev server with hot reload.
+  # Caddy serves it at https://${CADDY_HOSTNAME}:${WORDPRESS_SSL_PORT}/ and WordPress at /api.
   node:
     profiles: ["dev"]
-    image: node:20-alpine
+    image: node:22-alpine
     container_name: ${NODE_CONTAINER}
-    working_dir: /workspace/wp-content/themes/${WORDPRESS_THEMENAME}
+    working_dir: /app
     volumes:
-      - ./wordpress:/workspace
-      - theme_node_modules:/workspace/wp-content/themes/${WORDPRESS_THEMENAME}/node_modules
-    # Uncomment only if you later add a dev server / livereload (e.g. BrowserSync):
-    ports:
-     - "${NODE_PORT}:${NODE_PORT}"
-    # Required by SAGE (Uncomment only if the template is based in SAGE)
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    # No ports: Caddy proxies to it (same origin as the API, so no CORS needed)
     environment:
-      APP_URL: ${WORDPRESS_HOME} ## Required by SAGE
-      APP_HOST: ${CADDY_HOSTNAME} ## Required by SAGE
-      NODE_PORT: ${NODE_PORT} ## Required by SAGE
-      APP_PORT: ${WORDPRESS_SSL_PORT} ## Required by SAGE
-      VITE_PATH: ${VITE_PATH} ## Required by SAGE
-      #BUD_BROWSERSLIST_UPDATE: false ## Optional in SAGE 10
-    # If file-watching doesn't fire on macOS / Windows Docker Desktop, add polling —
-    # bind-mount inotify events don't cross the host boundary there:
-    #   environment:
-    #     CHOKIDAR_USEPOLLING: "true"
+      HOST: 0.0.0.0
+      PORT: ${NODE_PORT}
+      BROWSER: none
+      # Front-end settings, all from the project .env (no frontend/.env needed).
+      # CRA reads REACT_APP_* when the dev server starts or a build runs.
+      REACT_APP_API_URL: ${FRONTEND_API_URL:?Set FRONTEND_API_URL in .env}
+      REACT_APP_API_CUSTOM_PREFIX: ${FRONTEND_API_CUSTOM_PREFIX:-gruff-api/}
+      REACT_APP_API_VERSION: ${FRONTEND_API_VERSION:-wp/v2/}
+      DANGEROUSLY_DISABLE_HOST_CHECK: "true"   # requests arrive through Caddy
+      # If file-watching doesn't fire on macOS / Windows Docker Desktop, enable polling
+      # (bind-mount inotify events don't cross the host boundary there):
+      # CHOKIDAR_USEPOLLING: "true"
     command:
       - sh
       - -lc
       - |
         if [ ! -f node_modules/.deps-installed ] || ! cmp -s package-lock.json node_modules/.deps-installed 2>/dev/null; then
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            echo ">> No package-lock.json found - generating one via npm install (commit it for reproducible npm ci)"
-            npm install
-          fi
+          # npm install, not npm ci: the 2018 lockfile (v1) lists the macOS-only fsevents
+          # in a way npm 7+ rejects on Linux. npm install resolves it (and upgrades the lockfile).
+          npm install --no-audit --no-fund
           # dedicated marker (NOT npm's own node_modules/.package-lock.json) to detect installed state
           cp package-lock.json node_modules/.deps-installed 2>/dev/null || true
         fi
 
-        # Start watcher
-        npm run dev
-  composer:
-    profiles: ["tools"]
-    build:
-      context: .
-      dockerfile: docker/composer/Dockerfile
-    working_dir: /var/www/html/wp-content/themes/${WORDPRESS_THEMENAME}
-    # uncomment on Linux to avoid root-owned vendor/
-    #user: "${UID:-1000}:${GID:-1000}"
-    volumes:
-      - ./wordpress:/var/www/html
-    entrypoint: ["composer"]
+        # CRA dev server
+        npm start
   mysql:
     # image: mysql:latest -> do not use latest to avoid unexpected breaking changes, pin to a specific version
     image: mysql:8.0.36
@@ -74,6 +61,9 @@ services:
     # image: wordpress:latest > do not use latest to avoid unexpected breaking changes, pin to a specific version
     image: wordpress:php8.5-apache
     container_name: ${WORDPRESS_CONTAINER}
+    # WordPress lives in /api (like the live site): the image installs into working_dir,
+    # and Apache's document root stays /var/www/html, so /api/... maps to this folder.
+    working_dir: /var/www/html/api
     depends_on:
       mysql:
         condition: service_healthy
@@ -100,9 +90,9 @@ services:
       WORDPRESS_LOGGED_IN_SALT: ${WORDPRESS_LOGGED_IN_SALT:-}
       WORDPRESS_NONCE_SALT: ${WORDPRESS_NONCE_SALT:-}
     volumes:
-      - ./wordpress:/var/www/html
-      - ./wp-config.php:/var/www/html/wp-config.php:ro   # <— Custom wp-config.php
-      - ./logs:/var/www/html/logs
+      - ./wordpress:/var/www/html/api
+      - ./wp-config.php:/var/www/html/api/wp-config.php:ro   # <— Custom wp-config.php
+      - ./logs:/var/www/html/api/logs
       - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     restart: unless-stopped
 
@@ -126,7 +116,7 @@ services:
     image: wordpress:cli-php8.5
     container_name: ${WPCLI_CONTAINER}
     depends_on: [mysql, wordpress]
-    working_dir: /var/www/html
+    working_dir: /var/www/html/api       # same path as the wordpress container
     user: "www-data"                    # avoid root-owned files
     environment:
       WORDPRESS_DB_HOST: ${MYSQL_HOST}
@@ -146,8 +136,8 @@ services:
       WORDPRESS_LOGGED_IN_SALT: ${WORDPRESS_LOGGED_IN_SALT:-}
       WORDPRESS_NONCE_SALT: ${WORDPRESS_NONCE_SALT:-}
     volumes:
-      - ./wordpress:/var/www/html
-      - ./wp-config.php:/var/www/html/wp-config.php:ro   # <— Custom wp-config.php
+      - ./wordpress:/var/www/html/api
+      - ./wp-config.php:/var/www/html/api/wp-config.php:ro   # <— Custom wp-config.php
     entrypoint: ["wp"]                  # so ⁠ docker compose run wpcli <cmd> ⁠ runs ⁠ wp <cmd> ⁠
 
   caddy:
@@ -158,6 +148,7 @@ services:
     depends_on:
       - wordpress
       - phpmyadmin
+      - node
     ports:
       # - "80:80"
       # - "443:443"
@@ -167,14 +158,14 @@ services:
       WORDPRESS_SSL_PORT: ${WORDPRESS_SSL_PORT}
       CADDY_HOSTNAME: ${CADDY_HOSTNAME}
       CADDY_PRODUCTION_DOMAIN: ${CADDY_PRODUCTION_DOMAIN}
-      NODE_CONTAINER: ${NODE_CONTAINER}   ## Required by SAGE
-      NODE_PORT: ${NODE_PORT}             ## Required by SAGE
+      NODE_CONTAINER: ${NODE_CONTAINER}   ## React dev server
+      NODE_PORT: ${NODE_PORT}             ## React dev server
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./certs:/etc/caddy/certs:ro
-      - ./wordpress/wp-content/uploads:/var/www/html/wp-content/uploads:ro  # <— Caddy will check local uploads before getting them from remote server
+      - ./wordpress/wp-content/uploads:/srv/api/wp-content/uploads:ro  # Caddy serves local uploads first, otherwise fetches them from the live site
 
 
 volumes:
   mysql_data: ## Persistent storage for MySQL data to prevent data loss on container restart and allow pre-seeding with existing database if needed
-  theme_node_modules: ## Theme node_modules kept in a container-only volume (off the host bind mount) for speed + correct arch
+  frontend_node_modules: ## Front-end node_modules kept in a container-only volume (off the host bind mount) for speed + correct arch

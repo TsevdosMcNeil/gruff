@@ -126,6 +126,25 @@ wordpress/wp-content/themes/*
 
 
 # -------------------------
+# React
+# -------------------------
+
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# -------------------------
 # BEGIN Whitelisted Files
 # -------------------------
 
@@ -144,6 +163,10 @@ wordpress/wp-content/themes/*
 
 # Docs
 !docs/
+
+
+# track uploads.ini
+!uploads.ini
 
 # track example files, if they exist
 !*.example
@@ -168,9 +191,13 @@ wordpress/wp-content/themes/*
 !Caddyfile
 !docker
 
+# React frontend
+!frontend/
 
 # Wordpress: track these mu-plugins, plugins, and themes
 
+#htaccess configuration (Wordpress runs in <root>/api/
+!wordpress.htaccess
 
 # WPML Plugin: These files were updated to prevent fatal errors caused by incompatibilities between the WPML plugin and SAGE
 #!wp-content/plugins/wpml-string-translation/

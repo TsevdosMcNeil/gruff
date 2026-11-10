@@ -1,0 +1,24 @@
+// THEME COLORS
+$tColors:(
+  white: #ffffff,
+  black: #000000,
+  place: #cccccc,
+  mark: #ffff00,
+  txt: #817e7d,
+  border:#b1aeae,
+  lgrey: #f8f8f7,
+  rgrey: rgb(200, 204, 206),
+  green: rgb(45, 58, 46),
+  mist: rgb(234, 226, 207),
+  ral: rgb(233, 143, 157),
+  cit: rgb(238, 188, 50),
+  story: rgb(248, 248, 247)
+);
+
+@function color($key) {
+  @if map-has-key($tColors, $key) {
+    @return map-get($tColors, $key);
+  }
+  @warn "Unknown `#{$key}` in $tColors.";
+  @return null;
+}

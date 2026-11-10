@@ -1,0 +1,56 @@
+$allPrefix: ('webkit','apple','khtml','moz','rim','xv','ms','o');
+$norPrefix: ('webkit','moz','ms');
+@mixin prefix($property, $value, $prefixes: ()) {@each $prefix in $prefixes {#{'-' + $prefix + '-' + $property}: $value;} #{$property}: $value;}
+@mixin prefixAll($declarations, $prefixes: ()) {@each $property, $value in $declarations {@each $prefix in $prefixes {#{'-' + $prefix + '-' + $property}: $value;} #{$property}: $value;}}
+@mixin mbox-shadow($level) {
+    @if $level==0 { box-shadow: 0 0px 0px rgba(0, 0, 0, 0.12), 0 0px 0px rgba(0, 0, 0, 0.24); }
+    @else if $level==1 { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24); }
+    @else if $level==2 { box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23); }
+    @else if $level==3 { box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23); }
+    @else if $level==4 { box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22); }
+    @else if $level==5 { box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22); }
+}
+@mixin box-shadow($top, $left, $blur, $color, $inset: false) {
+  @if $inset {
+    -webkit-box-shadow:inset $top $left $blur $color;
+    -moz-box-shadow:inset $top $left $blur $color;
+    box-shadow:inset $top $left $blur $color;
+  } @else {
+    -webkit-box-shadow: $top $left $blur $color;
+    -moz-box-shadow: $top $left $blur $color;
+    box-shadow: $top $left $blur $color;
+  }
+}
+@mixin filter($filter-type,$filter-amount) { 
+  -webkit-filter: $filter-type+unquote('(#{$filter-amount})');
+  -moz-filter: $filter-type+unquote('(#{$filter-amount})');
+  -ms-filter: $filter-type+unquote('(#{$filter-amount})');
+  -o-filter: $filter-type+unquote('(#{$filter-amount})');
+  filter: $filter-type+unquote('(#{$filter-amount})');
+}
+@mixin border-radius($radius) {@include prefix(border-radius, $radius, $norPrefix);}
+@mixin display($display, $width) {display: $display;width: $width;}
+@mixin float($float, $width) {float: $float;width: $width;}
+@mixin box-sizing($box) {@include prefix(box-sizing, $box, $norPrefix);}
+@mixin appearance($apper) {@include prefix(appearance, $apper, $norPrefix);}
+@mixin transition($transition) {@include prefix(transition, $transition, $norPrefix);}
+@mixin transition-delay($transition-delay) {@include prefix(transition-delay, $transition-delay, $norPrefix);}
+@mixin transform-origin($v1, $v2) {@include prefix(transform-origin, $v1 $v2, $norPrefix);}
+@mixin transition-timing-function($tim) {@include prefix(transition-timing-function, $tim, $norPrefix);}
+@mixin transform($transform) {@include prefix(transform, $transform, $norPrefix);}
+@mixin transform-origin($origin) {@include prefix(transform-origin, $origin, $norPrefix);}
+@mixin flex(){display: -webkit-box; display: -ms-flexbox; display: flex;}
+@mixin flex-grow($grow){-webkit-box-flex: $grow;-ms-flex-positive: $grow;flex-grow: $grow;}
+@mixin flex-direction($dir) {@include prefix(flex-direction, $dir);}
+@mixin flex-wrap($wrap) {@include prefix(flex-wrap, $wrap);}
+@mixin justify-content($cont){-webkit-box-pack: $cont;-moz-box-pack: $cont;-webkit-justify-content: $cont;-ms-flex-pack: $cont;justify-content: $cont;}
+@mixin align-items($item){-webkit-box-align: $item;-moz-box-align: $item;-webkit-align-items: $item;-ms-flex-align: $item;align-items: $item;}
+@mixin align-content($cont) {@include prefix(align-content, $cont);}
+@mixin float($float, $width) {float: $float; width: $width;}
+@mixin grid($col, $gap) {width: (100% - ($gap * ($col - 1))) / $col; float: left; margin-right: $gap; min-height: 1px; list-style: none;}
+@mixin object($fit, $posi){width:100%; height:100%; -o-object-fit: $fit; object-fit: $fit; -o-object-position: $posi; object-position: $posi;}
+@mixin imgW(){-webkit-filter: brightness(0) invert(1); filter: brightness(0) invert(1);}
+@mixin imgN(){ -webkit-filter: brightness(100%) invert(0); filter: brightness(100%) invert(0); }
+@mixin centerXY() {position: absolute; top: 50%; left: 50%; @include transform(translate(-50%, -50%));}
+@mixin centerX() {position: absolute; left: 50%; @include transform(translateX(-50%));}
+@mixin centerY() {position: absolute; top: 50%; @include transform(translateY(-50%));}

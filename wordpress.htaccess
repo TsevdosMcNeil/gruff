@@ -1,0 +1,20 @@
+# Copy to wordpress/.htaccess — WordPress served from /api (same as the live site).
+# The WordPress image creates a .htaccess with "RewriteBase /", which breaks
+# /api/wp-json/... and every pretty permalink when WordPress lives in /api.
+
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /api/
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /api/index.php [L]
+</IfModule>
+# END WordPress
+
+# Debug and error logs live in the web root
+<IfModule mod_alias.c>
+RedirectMatch 404 ^/api/logs/
+</IfModule>
