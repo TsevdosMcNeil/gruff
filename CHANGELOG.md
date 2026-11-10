@@ -7,6 +7,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [0.1.1] - 2026-11-10
+
+- Wordpress template
+
 ## [0.1.0] - 2026-11-10
 
 Starting point: the existing Gruff site (React front end + WordPress API) running in a local Docker setup that copies the live layout.

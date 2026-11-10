@@ -1,0 +1,50 @@
+body.login
+{
+	background-color:rgb(200, 204, 206);
+}
+#login h1{
+	background-color:#ffffff;
+}
+#login h1 a {
+	background-image: url("../img/logoB.svg");
+	background-size: 140px;
+	width: 100%;
+	background-position: center;
+}
+
+.login form{
+	box-shadow:none;
+	padding:20px;
+}
+#login {
+	background:#FFF;
+	margin: 50px auto;
+	padding: 40px 20px;
+	width: 400px;
+}
+.login label {
+	color:
+	#555;
+	font-size: 14px;
+}
+.login form .forgetmenot{
+	float:none;
+}
+
+#login form p.submit{
+	margin-top:15px;
+}
+.login.wp-core-ui .button-primary {
+	background:#817e7d;
+	border-color:#817e7d;
+	box-shadow: 0 1px 0 #817e7d;
+	color: #FFF;
+	text-shadow: none;
+	float: none;
+	clear: both;
+	display: block;
+	width: 100%;
+	padding: 7px;
+	height: auto;
+	font-size: 15px;
+}
