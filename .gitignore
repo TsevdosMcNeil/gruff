@@ -194,6 +194,9 @@ yarn-error.log*
 # React frontend
 !frontend/
 
+# Ignore images
+frontend/src/assets/img
+
 # Wordpress: track these mu-plugins, plugins, and themes
 
 #htaccess configuration (Wordpress runs in <root>/api/
@@ -203,7 +206,7 @@ yarn-error.log*
 #!wp-content/plugins/wpml-string-translation/
 
 
-# Theme
+# Wordpress theme
 !wordpress/wp-content/themes/gruff/
 
 # Ignore dist folder of theme
