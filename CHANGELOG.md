@@ -7,6 +7,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [0.2.2] - 2026-11-11
+
+Staging environment
+
+### Changed
+
+ - Stop tracking frontend/build (generated, deployed via rsync)
+
 ## [0.2.1] - 2026-11-11
 
 Local now runs the same database server and table prefix as the live site, so local, staging and production share one stack.

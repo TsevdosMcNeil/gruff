@@ -2,7 +2,7 @@
 
 Website for [Gruff Architects](http://gruffarchitects.com/): headless WordPress for content, React front end.
 
-[![version](https://img.shields.io/badge/version-0.2.0-red.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://semver.org)
 
 
 | Part | Technology | Live URL |
@@ -12,6 +12,14 @@ Website for [Gruff Architects](http://gruffarchitects.com/): headless WordPress 
 | CMS | WordPress admin, login path hidden by [Protect WP Admin](https://wordpress.org/plugins/protect-wp-admin/) | `http://gruffarchitects.com/api/<login-slug>` |
 
 The CMS login slug isn't written here on purpose: Protect WP Admin only works while it stays private. Ask the team for it.
+
+---
+
+## Staging environment
+
+ - [STAGING.md](docs/STAGING.md)
+
+
 
 ---
 
@@ -169,6 +177,17 @@ docker compose up -d --force-recreate node            # after changing FRONTEND_
 docker compose run --rm wpcli plugin list             # any WP-CLI command
 docker compose exec node npm install <package>        # add a front-end dependency
 ```
+---
+
+## Headless set-up
+
+ - [HEADLESS.md](docs/HEADLESS.md)
+---
+
+## React
+
+ - [REACT.md](docs/REACT.md)
+
 
 ---
 
