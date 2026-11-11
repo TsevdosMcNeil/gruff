@@ -19,6 +19,10 @@ The CMS login slug isn't written here on purpose: Protect WP Admin only works wh
 
  - [STAGING.md](docs/STAGING.md)
 
+## Backlog
+
+ - [BACKLOG.md](docs/BACKLOG.md): known issues and improvements for later work (security first)
+
 
 
 ---
