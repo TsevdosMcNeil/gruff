@@ -7,6 +7,29 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [0.3.0] - 2026-11-11
+
+Video modules for project pages.
+
+### Added
+
+- Section Builder field type **Video**. The editor chooses:
+  - **Source**: a video file from the Media Library (with guidance on file size, and a warning above 20 MB), or a YouTube / Vimeo link.
+  - **Playback**: autoplay (muted, loops, no controls; starts when the section comes into view) or player controls (the visitor presses play, with sound).
+  - **Poster image** for video files (optional).
+  Files are stored as root-relative URLs (`/api/wp-content/uploads/...`), so the same database works on local, staging and production.
+- Three project modules: **Video 1 (Full width)** `layout26`, **Video 2 (Video left, text right)** `layout27`, **Video 3 (Text left, video right)** `layout28`.
+- `settings/section-builder/video-modules.php`:
+  - creates the field type and modules in the database the first time an administrator opens wp-admin (option `gruff_video_modules_version`) and copies the module icons from `settings/section-builder/icons/`;
+  - `gruff_render_videos()` turns the module's video placeholder into a `<video>` or a YouTube / Vimeo `<iframe>` (embed proportions from oEmbed, cached).
+- `SectionDB::load_rendered()` now passes its output through the `gruff_section_rendered` filter.
+- Front end: `video-modules.css` (imported in `index.css`); project pages pause Vimeo videos when leaving a section and play autoplay ones when arriving (fullpage.js already does this for video files and YouTube).
+
+### Deploy
+
+- Theme: upload `functions.php`, `settings/classes/SectionDB.php`, `settings/section-builder/video-modules.php`, `settings/section-builder/icons/`, `settings/assets/js/video-field.js` and `settings/assets/css/video-field.css`, then open wp-admin once as an administrator.
+- Front end: rebuild and rsync `frontend/build`.
+
 ## [0.2.2] - 2026-11-11
 
 Staging environment

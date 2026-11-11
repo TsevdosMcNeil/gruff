@@ -97,8 +97,9 @@ Class SectionDB{
 					}
 				}  
 			}
-		}  
-		return $output_html;
+		}
+		//Let modules post-process the section (e.g. video-modules.php turns video placeholders into players)
+		return apply_filters('gruff_section_rendered', $output_html, $section);
 	}
 
 }

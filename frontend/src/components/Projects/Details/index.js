@@ -14,6 +14,16 @@ import {
     Link
 } from 'react-router-dom'
 
+// Vimeo videos in the video modules: fullpage.js plays/pauses <video> and YouTube by itself,
+// Vimeo needs a postMessage. Pause when leaving a section, play autoplay videos when arriving.
+const vimeo = (section, method, onlyAutoplay) => {
+  if (!section) return;
+  section.querySelectorAll('iframe[src*="player.vimeo.com"]').forEach((frame) => {
+    if (onlyAutoplay && !frame.hasAttribute('data-autoplay')) return;
+    if (frame.contentWindow) frame.contentWindow.postMessage(JSON.stringify({ method }), 'https://player.vimeo.com');
+  });
+};
+
 const gruffPluginWrapper = () => {
   require('fullpage.js/vendors/scrolloverflow');
   require('../../../lib/fullpage.offsetSections.min');
@@ -63,6 +73,8 @@ class Index extends React.Component {
         responsiveHeight={650}
         gruffPluginWrapper
         offsetSections={true}
+        onLeave={(origin) => { vimeo(origin && origin.item, 'pause'); }}
+        afterLoad={(origin, destination) => { vimeo(destination && destination.item, 'play', true); }}
         render={({ state, fullpageApi }) => {
           let layoutData = projectList[0].layout.map((row, index) => {
             return (

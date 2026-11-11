@@ -1,0 +1,30 @@
+/*
+* Video field for the section builder
+* Added on: 11.11.2026
+*/
+
+/* The section form sits at z-index 999999: put the Media Library above it */
+body.LBOpen .media-modal { z-index: 1000001; }
+body.LBOpen .media-modal-backdrop { z-index: 1000000; }
+
+.gr-video-field > span { display: block; margin-bottom: 8px; font-weight: 600; }
+.gr-video-field .gr-video-row { margin-bottom: 18px; }
+.gr-video-field .gr-video-row > label { display: block; margin: 4px 0; cursor: pointer; }
+.gr-video-field .gr-video-row > label.gr-video-label { cursor: default; font-weight: 600; margin-bottom: 6px; }
+.gr-video-field input[type="radio"] { margin-right: 6px; }
+.gr-video-field .gr-video-url { width: 100%; }
+.gr-video-field .gr-video-preview video,
+.gr-video-field .gr-video-poster-preview img { display: block; max-width: 100%; max-height: 220px; margin-bottom: 6px; }
+.gr-video-field .gr-video-preview video { background: #000; }
+.gr-video-field .gr-video-name { margin: 0 0 10px; font-size: 12px; color: #666; word-break: break-all; }
+.gr-video-field .gr-video-select,
+.gr-video-field .gr-video-clear { display: inline-block; margin-right: 10px; cursor: pointer; }
+.gr-video-field .gr-video-help { margin: 8px 0 0; font-size: 12px; color: #666; line-height: 1.5; }
+.gr-video-field .gr-video-warning { margin: 6px 0 0; font-size: 12px; color: #b32d2e; }
+.gr-video-field .gr-video-warning.is-ok { color: #2e7d32; }
+.gr-video-field .gr-video-warning:empty { display: none; }
+
+/* Saved sections preview in the project editor */
+.page-sections .layoutVideo video { display: block; max-width: 100%; max-height: 300px; }
+.page-sections .layoutVideo .gruff-videoEmbed { position: relative; width: 100%; max-width: 480px; aspect-ratio: var(--r, 1.7778); }
+.page-sections .layoutVideo .gruff-videoEmbed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }

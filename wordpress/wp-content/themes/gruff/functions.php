@@ -13,6 +13,7 @@ add_action('admin_enqueue_scripts', 'gruff_common_admin_scripts');
 
 include_once('settings/theme-settings.php');
 include_once('settings/section-builder/builder.php');
+include_once('settings/section-builder/video-modules.php');
 include_once('settings/projects/project-settings.php');
 include_once('settings/stories/stories-settings.php');
 

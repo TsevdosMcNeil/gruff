@@ -1,0 +1,102 @@
+/*
+* Video modules (Section Builder: "Projects | Video 1-3")
+* Added on: 11.11.2026
+*
+* layout26: full width              (same as image layout1)
+* layout27: video left, text right  (same as image layout21)
+* layout28: text left, video right  (layout21 mirrored)
+*
+* The player sits in .fulidImg-container like the images, so the shared responsive
+* rules in style.css (padding, stacking under 600px, captions) apply as they are.
+*
+* .gruff-videoFile   uploaded video (<video>), sized like the images
+* .gruff-videoEmbed  YouTube / Vimeo (<iframe>), keeps the video's proportions (--r = width / height)
+*                    and never gets taller than the screen
+*/
+
+.gruff--ProjectDetails .gruff-Layout .gruff-videoFile {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100% - 29px);
+  width: auto;
+  height: auto;
+}
+
+.gruff--ProjectDetails .gruff-Layout .gruff-videoEmbed {
+  position: relative;
+  width: 100%;
+  max-width: calc((100vh - 150px) * var(--r, 1.7778));
+  aspect-ratio: var(--r, 1.7778);
+}
+.gruff--ProjectDetails .gruff-Layout .gruff-videoEmbed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+/* Autoplay: behaves like a moving photo, no YouTube/Vimeo hover controls */
+.gruff--ProjectDetails .gruff-Layout .gruff-videoEmbed.is-autoplay iframe {
+  pointer-events: none;
+}
+
+/* Full width */
+.gruff--ProjectDetails .gruff-Layout.layout26 {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+.gruff--ProjectDetails .gruff-Layout.layout26 .fulidImg-container {
+  width: 100%;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+.gruff--ProjectDetails .gruff-Layout.layout26 p {
+  width: auto;
+  float: none;
+}
+
+/* Two columns */
+.gruff--ProjectDetails .gruff-Layout.layout27 .fulidImg-container { width: 48%; float: left; }
+.gruff--ProjectDetails .gruff-Layout.layout27 .content-container { width: 48%; float: right; }
+.gruff--ProjectDetails .gruff-Layout.layout28 .content-container { width: 48%; float: left; }
+.gruff--ProjectDetails .gruff-Layout.layout28 .fulidImg-container { width: 48%; float: right; }
+
+@media (max-width: 1400px), (max-height: 850px) {
+  .gruff--ProjectDetails .gruff-Layout.layout27 .content-container,
+  .gruff--ProjectDetails .gruff-Layout.layout28 .content-container { width: 52%; }
+  .gruff--ProjectDetails .gruff-Layout.layout27 .fulidImg-container,
+  .gruff--ProjectDetails .gruff-Layout.layout28 .fulidImg-container { width: 45%; }
+}
+
+@media (min-width: 1401px) {
+  .gruff--ProjectDetails .gruff-Layout.layout27,
+  .gruff--ProjectDetails .gruff-Layout.layout28 { padding-right: 220px; }
+}
+@media (max-width: 1400px) and (min-width: 1201px) {
+  .gruff--ProjectDetails .gruff-Layout.layout27,
+  .gruff--ProjectDetails .gruff-Layout.layout28 { padding-right: 130px; }
+}
+
+/* Phones: full width, natural height (style.css does the same for images) */
+@media (max-width: 600px), (max-height: portait) {
+  .gruff--ProjectDetails .gruff-Layout:not(.layout0) .gruff-videoFile {
+    width: 100%;
+    max-height: none;
+  }
+  .gruff--ProjectDetails .gruff-Layout:not(.layout0) .gruff-videoEmbed {
+    max-width: calc((100vh - 80px) * var(--r, 1.7778));
+  }
+}
