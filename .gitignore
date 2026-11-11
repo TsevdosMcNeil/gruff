@@ -198,6 +198,9 @@ yarn-error.log*
 # Ignore images
 frontend/src/assets/img
 
+# Ignore production files (React build: generated, deployed with rsync)
+frontend/build/
+
 # Wordpress: track these mu-plugins, plugins, and themes
 
 #htaccess configuration (Wordpress runs in <root>/api/
