@@ -5,7 +5,8 @@
 # Does what docs/STAGING.md "Deploying changes to staging" describes:
 #   1. checks git: warns about uncommitted or unpushed changes
 #   2. builds the React front end (in the node container)
-#   3. rsyncs the project files + build, then the theme and plugins
+#   3. rsyncs the project files + build, then the theme and plugins,
+#      and sets their owner to www-data on the server
 #   4. recreates the containers if the Docker / PHP / database config changed
 #   5. runs the checks from "Checklist after a deploy"
 #
@@ -16,7 +17,7 @@
 #       --no-plugins    don't sync wp-content/plugins
 #   -h, --help
 #
-# Needs: Homebrew rsync (brew install rsync), Docker, the SSH alias DigitalOceanTMServer
+# Needs: rsync, Docker, the SSH alias DigitalOceanTMServer
 # and the sudo rule for rsync on the server (see docs/STAGING.md).
 #
 # Keep this script compatible with macOS's bash 3.2.
@@ -91,15 +92,11 @@ printf '%sDeploy to staging%s  %s\n' "$BOLD" "$RESET" "$SITE_URL"
 # ----------------------------------------------------------------------------
 step "Checking requirements"
 
-# Homebrew rsync (macOS's openrsync has no --chown)
-RSYNC="rsync"
-if command -v brew >/dev/null 2>&1 && [ -x "$(brew --prefix)/bin/rsync" ]; then
-  RSYNC="$(brew --prefix)/bin/rsync"
-fi
-if ! "$RSYNC" --version 2>/dev/null | head -1 | grep -q 'rsync  *version 3'; then
-  fail "Needs rsync 3 (macOS's openrsync has no --chown): brew install rsync"
-fi
-ok "rsync: $("$RSYNC" --version | head -1)"
+# Any rsync works: ownership is set on the server afterwards (see "Fixing ownership"),
+# because macOS's openrsync has no --chown
+command -v rsync >/dev/null 2>&1 || fail "rsync isn't installed"
+RSYNC_VERSION="$(rsync --version 2>/dev/null || true)"
+ok "rsync: $(command -v rsync) (${RSYNC_VERSION%%$'\n'*})"
 
 command -v docker >/dev/null 2>&1 || fail "Docker isn't installed"
 docker info >/dev/null 2>&1 || fail "Docker isn't running"
@@ -179,9 +176,9 @@ NGINX_CHANGED=0
 if [ -n "$PREVIOUS_COMMIT" ] && git cat-file -e "$PREVIOUS_COMMIT^{commit}" 2>/dev/null; then
   CHANGED_FILES="$(git diff --name-only "$PREVIOUS_COMMIT" -- . ; git ls-files --others --exclude-standard)"
   for f in $CONFIG_FILES; do
-    if printf '%s\n' "$CHANGED_FILES" | grep -qx "$f"; then CHANGED_CONFIG="$CHANGED_CONFIG $f"; fi
+    if grep -qx "$f" <<< "$CHANGED_FILES"; then CHANGED_CONFIG="$CHANGED_CONFIG $f"; fi
   done
-  if printf '%s\n' "$CHANGED_FILES" | grep -qx "nginx.conf.staging"; then NGINX_CHANGED=1; fi
+  if grep -qx "nginx.conf.staging" <<< "$CHANGED_FILES"; then NGINX_CHANGED=1; fi
   ok "Last deploy: $PREVIOUS_COMMIT"
 else
   warn "Couldn't tell what was deployed last, so config changes can't be checked"
@@ -203,7 +200,8 @@ trap 'rm -f .deploy-info' EXIT
 
 run_rsync() {
   # bash 3.2-safe: pass the options as separate arguments
-  "$RSYNC" -az --delete --rsync-path="sudo rsync" --chown=www-data:www-data \
+  # --no-owner --no-group: don't copy the Mac's user and group; "Fixing ownership" sets www-data
+  rsync -az --no-owner --no-group --delete --rsync-path="sudo rsync" \
     $( [ "$DRY_RUN" = 1 ] && echo "--dry-run --itemize-changes" || echo "--human-readable --stats" ) \
     "$@"
 }
@@ -233,9 +231,32 @@ fi
 
 
 
+# ----------------------------------------------------------------------------
+# Fixing ownership
+# ----------------------------------------------------------------------------
+# Everything on staging must be owned by www-data (docs/STAGING.md). The server's rsync
+# copies the folder onto itself with --chown: contents don't change, only owners do.
+# It only needs the existing sudo rule for rsync.
+step "Fixing ownership (www-data)"
 if [ "$DRY_RUN" = 1 ]; then
+  WRONG_OWNER="$(ssh "$SERVER" "sudo -n rsync -a --dry-run --itemize-changes --chown=www-data:www-data '$REMOTE_DIR/' '$REMOTE_DIR/'" || echo "FAILED")"
+  if [ "$WRONG_OWNER" = "FAILED" ]; then
+    warn "Couldn't check ownership on the server (sudo rsync failed)"
+  elif [ -n "$WRONG_OWNER" ]; then
+    warn "$(printf '%s\n' "$WRONG_OWNER" | wc -l | tr -d ' ') file(s) or folder(s) aren't owned by www-data yet: a real deploy fixes them"
+  else
+    ok "Everything is owned by www-data"
+  fi
   step "Dry run finished: nothing was changed"
   exit 0
+fi
+
+FIXED="$(ssh "$SERVER" "sudo -n rsync -a --itemize-changes --chown=www-data:www-data '$REMOTE_DIR/' '$REMOTE_DIR/'")" \
+  || fail "Couldn't set the owner to www-data (sudo rsync failed on the server). WordPress may not be able to write its files."
+if [ -n "$FIXED" ]; then
+  ok "Owner set to www-data on $(printf '%s\n' "$FIXED" | wc -l | tr -d ' ') file(s) or folder(s)"
+else
+  ok "Everything was already owned by www-data"
 fi
 
 # ----------------------------------------------------------------------------
@@ -275,13 +296,15 @@ check_status "/practice"  200 "React route reloads"
 check_status "/people"    200 "React route reloads"
 check_status "/api/logs/" 404 "Logs aren't public"
 
-if curl -s --max-time 20 "$SITE_URL/api/wp-json/gruff-api/menu" | head -c 1 | grep -q '[[{]'; then
+API_BODY="$(curl -s --max-time 20 "$SITE_URL/api/wp-json/gruff-api/menu" || true)"
+if [ "${API_BODY:0:1}" = "[" ] || [ "${API_BODY:0:1}" = "{" ]; then
   ok "API returns JSON (/api/wp-json/gruff-api/menu)"
 else
   warn "API doesn't return JSON (/api/wp-json/gruff-api/menu)"; FAILED=1
 fi
 
-if curl -sI --max-time 20 "$SITE_URL/" | grep -qi '^x-robots-tag:.*noindex'; then
+HEADERS="$(curl -sI --max-time 20 "$SITE_URL/" || true)"
+if grep -qi '^x-robots-tag:.*noindex' <<< "$HEADERS"; then
   ok "Search engines kept out (X-Robots-Tag: noindex)"
 else
   warn "No X-Robots-Tag: noindex header"; FAILED=1

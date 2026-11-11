@@ -122,7 +122,7 @@ It runs the steps below in order:
 
 1. Checks git and warns if there are uncommitted changes, unpushed commits, or commits on GitHub you haven't pulled. It asks before carrying on.
 2. Builds the React front end and checks that `frontend/build/.htaccess` exists.
-3. Syncs the project files and build, the themes and the plugins.
+3. Syncs the project files and build, the themes and the plugins, then sets their owner to `www-data` on the server.
 4. If `docker-compose*.yml`, `uploads.ini` or `mysql-lowmem.cnf` changed since the last deploy, asks to recreate the containers. A changed `nginx.conf.staging` is only reported (see step 4 below).
 5. Runs the automatic part of the checklist after a deploy.
 
@@ -139,7 +139,7 @@ Each deploy writes `/data/webs/gruff/.deploy-info` on the server (commit, branch
 
 Everything is built and tested locally first, then synced with rsync. The server never builds anything, because there isn't enough RAM to spare. It doesn't need git access either.
 
-The rsync commands use the standard rsync from Homebrew (`brew install rsync`); macOS's built-in `openrsync` has no `--chown`. They write as root on the server through a passwordless sudo rule limited to rsync (`/etc/sudoers.d/pablo-rsync`) and set the owner to `www-data` on arrival.
+The rsync commands write as root on the server through a passwordless sudo rule limited to rsync (`/etc/sudoers.d/pablo-rsync`). They work with macOS's own rsync (`openrsync`), which has no `--chown`. So the files are uploaded without their Mac owner (`--no-owner --no-group`), and the last command sets the owner to `www-data` using the server's rsync (step 3b).
 
 > Keep each command on **one line**. A space after a trailing `\` breaks the command.
 
@@ -154,7 +154,7 @@ ls frontend/build/.htaccess    # must exist
 ### 2. Project files and build (everything except `wordpress/`)
 
 ```bash
-cd ~/Dockers/gruff && rsync -avz --delete --rsync-path="sudo rsync" --chown=www-data:www-data --exclude='wordpress' --exclude='.git' --exclude='node_modules' --exclude='.sass-cache' --exclude='docs' --exclude='backups' --exclude='.env' --exclude='.htpasswd-pma' --exclude='certs' --exclude='logs' --exclude='*.sql' --exclude='*.gz' --exclude='*.zip' --exclude='*.patch' ./ DigitalOceanTMServer:/data/webs/gruff/
+cd ~/Dockers/gruff && rsync -avz --no-owner --no-group --delete --rsync-path="sudo rsync" --exclude='wordpress' --exclude='.git' --exclude='node_modules' --exclude='.sass-cache' --exclude='docs' --exclude='backups' --exclude='.env' --exclude='.htpasswd-pma' --exclude='certs' --exclude='logs' --exclude='*.sql' --exclude='*.gz' --exclude='*.zip' --exclude='*.patch' ./ DigitalOceanTMServer:/data/webs/gruff/
 ```
 
 Excluded paths are never deleted on the server, so `--delete` leaves the staging `.env`, `.htpasswd-pma` and `logs` alone.
@@ -162,11 +162,21 @@ Excluded paths are never deleted on the server, so `--delete` leaves the staging
 ### 3. Theme and plugins (only when they changed)
 
 ```bash
-cd ~/Dockers/gruff && rsync -avz --delete --rsync-path="sudo rsync" --chown=www-data:www-data --exclude='node_modules' --exclude='.git' ./wordpress/wp-content/themes/ DigitalOceanTMServer:/data/webs/gruff/wordpress/wp-content/themes/
-cd ~/Dockers/gruff && rsync -avz --delete --rsync-path="sudo rsync" --chown=www-data:www-data --exclude='node_modules' --exclude='.git' ./wordpress/wp-content/plugins/ DigitalOceanTMServer:/data/webs/gruff/wordpress/wp-content/plugins/
+cd ~/Dockers/gruff && rsync -avz --no-owner --no-group --delete --rsync-path="sudo rsync" --exclude='node_modules' --exclude='.git' ./wordpress/wp-content/themes/ DigitalOceanTMServer:/data/webs/gruff/wordpress/wp-content/themes/
+cd ~/Dockers/gruff && rsync -avz --no-owner --no-group --delete --rsync-path="sudo rsync" --exclude='node_modules' --exclude='.git' ./wordpress/wp-content/plugins/ DigitalOceanTMServer:/data/webs/gruff/wordpress/wp-content/plugins/
 ```
 
 No restart is needed: the files are mounted from the folders, not baked into images. To preview what would change, add `-n` (dry run).
+
+### 3b. Owner (after every sync)
+
+```bash
+ssh DigitalOceanTMServer "sudo rsync -a --itemize-changes --chown=www-data:www-data /data/webs/gruff/ /data/webs/gruff/"
+```
+
+The server's rsync copies the folder onto itself with `--chown`: file contents stay the same, only owners change. It lists what it fixed; no output means everything was already owned by `www-data`.
+
+`--chown` can't go in `--rsync-path` instead: rsync 3.2.7, the version Ubuntu 24.04 ships, rejects it there with "You can only specify a user-affecting --chown once".
 
 ### 4. Config changes
 
@@ -282,7 +292,8 @@ docker stats --no-stream | grep gruff
 | API returns 404 | `wordpress/.htaccess` is missing or has `RewriteBase /`; copy `wordpress.htaccess` again |
 | Redirect loop or unstyled WP admin | `wp-config.php` isn't treating `X-Forwarded-Proto: https` as HTTPS |
 | rsync "Permission denied" | sudo rule missing, or `--rsync-path="sudo rsync"` left out |
-| rsync "unrecognized option --chown" | running macOS's `openrsync`; use Homebrew's rsync |
+| rsync "unrecognized option --chown" | macOS's `openrsync` has no `--chown`: sync with `--no-owner --no-group` and fix the owner afterwards (step 3b) |
+| WordPress can't write a file, or files on staging are owned by `UNKNOWN` / a number | synced without `--no-owner --no-group` or without step 3b; run step 3b |
 | Container restarts during a big export | the WordPress `mem_limit` is too low for PHP's 512M |
 
 ---
