@@ -7,6 +7,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [0.3.1] - 2026-11-11
+
+### Added
+
+- `deploy-staging.sh`: deploys local to staging in one command. It warns about uncommitted or unpushed changes, builds the front end, syncs files, theme and plugins, recreates the containers when their config changed, and runs the post-deploy checks. See docs/STAGING.md.
+
 ## [0.3.0] - 2026-11-11
 
 Video modules for project pages.

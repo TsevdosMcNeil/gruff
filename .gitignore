@@ -175,6 +175,9 @@ yarn-error.log*
 # track staging files, if they exist
 !*.staging
 
+# Deploy script (*.sh is ignored above)
+!deploy-staging.sh
+
 # track favicon files, if they exist
 !android-chrome-*.png
 !apple-touch-icon*.png

@@ -112,6 +112,31 @@ On top of `docker-compose.yml`, it does three things:
 
 ## Deploying changes to staging
 
+### With the script
+
+```bash
+cd ~/Dockers/gruff && ./deploy-staging.sh
+```
+
+It runs the steps below in order:
+
+1. Checks git and warns if there are uncommitted changes, unpushed commits, or commits on GitHub you haven't pulled. It asks before carrying on.
+2. Builds the React front end and checks that `frontend/build/.htaccess` exists.
+3. Syncs the project files and build, the themes and the plugins.
+4. If `docker-compose*.yml`, `uploads.ini` or `mysql-lowmem.cnf` changed since the last deploy, asks to recreate the containers. A changed `nginx.conf.staging` is only reported (see step 4 below).
+5. Runs the automatic part of the checklist after a deploy.
+
+Each deploy writes `/data/webs/gruff/.deploy-info` on the server (commit, branch, date, whether there were uncommitted changes). That's how the next deploy knows which config files changed. Check it with `ssh DigitalOceanTMServer cat /data/webs/gruff/.deploy-info`.
+
+| Option | |
+|---|---|
+| `-n`, `--dry-run` | show what would change on the server, change nothing |
+| `-y`, `--yes` | don't ask (continue past git warnings, recreate containers when needed) |
+| `--no-build` | deploy the existing `frontend/build` |
+| `--no-plugins` | don't sync `wp-content/plugins` |
+
+### By hand
+
 Everything is built and tested locally first, then synced with rsync. The server never builds anything, because there isn't enough RAM to spare. It doesn't need git access either.
 
 The rsync commands use the standard rsync from Homebrew (`brew install rsync`); macOS's built-in `openrsync` has no `--chown`. They write as root on the server through a passwordless sudo rule limited to rsync (`/etc/sudoers.d/pablo-rsync`) and set the owner to `www-data` on arrival.

@@ -2,7 +2,7 @@
 
 Website for [Gruff Architects](http://gruffarchitects.com/): headless WordPress for content, React front end.
 
-[![version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/version-0.3.1-blue.svg)](https://semver.org)
 
 
 | Part | Technology | Live URL |
