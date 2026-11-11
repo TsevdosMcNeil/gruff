@@ -154,10 +154,12 @@ ls frontend/build/.htaccess    # must exist
 ### 2. Project files and build (everything except `wordpress/`)
 
 ```bash
-cd ~/Dockers/gruff && rsync -avz --no-owner --no-group --delete --rsync-path="sudo rsync" --exclude='wordpress' --exclude='.git' --exclude='node_modules' --exclude='.sass-cache' --exclude='docs' --exclude='backups' --exclude='.env' --exclude='.htpasswd-pma' --exclude='certs' --exclude='logs' --exclude='*.sql' --exclude='*.gz' --exclude='*.zip' --exclude='*.patch' ./ DigitalOceanTMServer:/data/webs/gruff/
+cd ~/Dockers/gruff && rsync -avz --no-owner --no-group --delete --rsync-path="sudo rsync" --exclude='/frontend/build/api' --exclude='wordpress' --exclude='.git' --exclude='node_modules' --exclude='.sass-cache' --exclude='docs' --exclude='backups' --exclude='.env' --exclude='.htpasswd-pma' --exclude='certs' --exclude='logs' --exclude='*.sql' --exclude='*.gz' --exclude='*.zip' --exclude='*.patch' ./ DigitalOceanTMServer:/data/webs/gruff/
 ```
 
 Excluded paths are never deleted on the server, so `--delete` leaves the staging `.env`, `.htpasswd-pma` and `logs` alone.
+
+**Never let `frontend/build/api` be deleted on the server.** Inside the container, `./wordpress` is mounted at `/var/www/html/api`, on top of the `./frontend/build` mount, so it needs that empty folder to sit on. The local build has no `api` folder, so without `--exclude='/frontend/build/api'` rsync deletes it. Linux then drops the mount inside the running container, and every `/api` URL serves the React app (the site loads with no content). To repair it, recreate the container: `docker compose up -d --force-recreate wordpress`. `deploy-staging.sh` checks for this and does it automatically.
 
 ### 3. Theme and plugins (only when they changed)
 
@@ -290,6 +292,8 @@ docker stats --no-stream | grep gruff
 | `/pma` returns 500 | `.htpasswd-pma` is missing; recreate it with `sudo htpasswd -c …` |
 | `/practice` reload returns 404 | `frontend/build/.htaccess` is missing; check `frontend/public/.htaccess` and rebuild |
 | API returns 404 | `wordpress/.htaccess` is missing or has `RewriteBase /`; copy `wordpress.htaccess` again |
+| Site loads with no content, and `/api/...` returns the React page (HTML) instead of JSON | `frontend/build/api` was deleted by rsync, so the WordPress volume isn't mounted any more: `docker compose up -d --force-recreate wordpress` (see step 2) |
+| Typing an `/api/...` URL in the address bar shows the React app, while the API works with `curl` | the React service worker (`registerServiceWorker` in `frontend/src/index.js`) answers page loads from its cache: use a private window, or unregister it in DevTools → Application → Service Workers |
 | Redirect loop or unstyled WP admin | `wp-config.php` isn't treating `X-Forwarded-Proto: https` as HTTPS |
 | rsync "Permission denied" | sudo rule missing, or `--rsync-path="sudo rsync"` left out |
 | rsync "unrecognized option --chown" | macOS's `openrsync` has no `--chown`: sync with `--no-owner --no-group` and fix the owner afterwards (step 3b) |

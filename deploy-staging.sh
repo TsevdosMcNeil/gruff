@@ -207,7 +207,10 @@ run_rsync() {
 }
 
 step "Syncing project files and the front-end build"
-run_rsync \
+# /frontend/build/api must survive --delete: it's the folder the WordPress volume is mounted on
+# inside the container (docker-compose.yml mounts ./wordpress at /var/www/html/api, on top of
+# ./frontend/build). Deleting it removes that mount and every /api URL serves the React app.
+run_rsync --exclude='/frontend/build/api' \
   --exclude='wordpress' --exclude='.git' --exclude='node_modules' --exclude='.sass-cache' \
   --exclude='docs' --exclude='backups' --exclude='.env' --exclude='.htpasswd-pma' \
   --exclude='certs' --exclude='logs' --exclude='*.sql' --exclude='*.gz' --exclude='*.zip' \
@@ -230,6 +233,24 @@ else
 fi
 
 
+
+# ----------------------------------------------------------------------------
+# WordPress volume
+# ----------------------------------------------------------------------------
+# If the /api mount point was lost (see the note above the first rsync), recreate the
+# WordPress container: Docker mounts ./wordpress again and recreates the folder.
+if [ "$DRY_RUN" = 0 ]; then
+  step "Checking that the container still sees WordPress at /api"
+  if ssh "$SERVER" "cd '$REMOTE_DIR' && docker compose exec -T wordpress test -f /var/www/html/api/wp-load.php"; then
+    ok "WordPress is mounted at /api"
+  else
+    warn "WordPress isn't mounted at /api: recreating the WordPress container"
+    ssh "$SERVER" "cd '$REMOTE_DIR' && docker compose up -d --force-recreate wordpress"
+    ssh "$SERVER" "cd '$REMOTE_DIR' && docker compose exec -T wordpress test -f /var/www/html/api/wp-load.php" \
+      && ok "WordPress is mounted at /api again" \
+      || fail "WordPress still isn't mounted at /api: check docker compose logs wordpress on the server"
+  fi
+fi
 
 # ----------------------------------------------------------------------------
 # Fixing ownership
