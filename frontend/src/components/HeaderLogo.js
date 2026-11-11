@@ -15,7 +15,7 @@ class HeaderLogo extends React.Component {
     let Logo = this.props.whiteLogo ? WImg : BImg;
     return (
         <Link className="gruff-HeaderLogo" to={`${process.env.PUBLIC_URL}/`} >
-            <img src={Logo} />
+            <img src={Logo} alt="Gruff" title="Gruff"/>
         </Link>
     );
   }

@@ -10,28 +10,29 @@ class Content extends React.Component {
     let office_details  = !(office_details in options) ? options.office_details : '';
     let contact_number  = !(contact_number in options) ? options.contact_number : '';
     let contact_email   = !(contact_email in options) ? options.contact_email : '';
+    let logos           = !(logos in options) ? options.logos : '';
 
     return (
-      <div className="gruff-Content fullW">
-        <div className="fullW">
-          <div className="screen-left">
-            <div className="fullW" dangerouslySetInnerHTML={{__html: office_details}} />
-          </div>
-          <div className="screen-right">
-            <div className="fullW" dangerouslySetInnerHTML={{__html: office_address}} />
-            <ul className="gruff-Cinfo fulLW">
+      <div className="gruff--Contact fullW">
+          <div className="gruff-ContactInfo">
+              <div className="gruff-ContactBox fullW" dangerouslySetInnerHTML={{__html: office_details}} />
+              <ul className="gruff-Cinfo fulLW">
+                {
+                  contact_number &&
+                    <li><a href={`tel:${contact_number}`}>{contact_number}</a></li>
+                }
+                {
+                  contact_email &&
+                    <li><a href={`mailto:${contact_email}`}>{contact_email}</a></li>
+                }
+              </ul>
+              <div className="gruff-ContactBox fullW" dangerouslySetInnerHTML={{__html: office_address}} />
               {
-                contact_number &&
-                  <li><a href={`tel:${contact_number}`}>{contact_number}</a></li>
-              }
-              {
-                contact_email &&
-                  <li><a href={`mailto:${contact_email}`}>{contact_email}</a></li>
-              }
-            </ul>
+                logos &&
+                  <div className="fullW" dangerouslySetInnerHTML={{__html:logos}} />
+              } 
           </div>
-        </div>  
-        <RecentProjects {...this.props}/>
+          <RecentProjects {...this.props}/>
       </div>
     );
   }

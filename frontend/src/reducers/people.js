@@ -1,5 +1,5 @@
 const initialState = {
-  data:{},
+  data:[],
   loading: true,
   error: null
 };
@@ -24,7 +24,7 @@ export default function fetchPeople(state = initialState,action){
             ...state,
             loading: false,
             error: action.payload.error,
-            data:{}
+            data:[]
           };
     
         default:

@@ -30,7 +30,7 @@ export default function makeTransition(state = initialState,action){
                 ...state,
                 loading: false,
                 error: action.payload.error,
-                transitionData:initialState
+                //transitionData:initialState
             };
         case 'LOAD_DETAILS_SUCCESS':{
             return {

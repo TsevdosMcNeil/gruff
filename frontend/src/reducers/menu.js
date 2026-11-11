@@ -15,7 +15,6 @@ export default function fetchMenu(state = initialState,action){
             };
     
         case 'FETCH_MENU_SUCCESS':
-
             return {
                 ...state,
                 loading: false,

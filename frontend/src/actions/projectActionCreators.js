@@ -13,7 +13,7 @@ export const fetchProjectsError = error => ({
     payload: { error }
 });
 
-export function fetchProjects() {
+export function fetchProjects(slug = '') {
   return dispatch => {
     dispatch(fetchProjectsBegin());
     return fetch(process.env.REACT_APP_API_URL+process.env.REACT_APP_API_CUSTOM_PREFIX+'projects')

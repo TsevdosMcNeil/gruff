@@ -20,6 +20,7 @@ services:
       REACT_APP_API_URL: ${FRONTEND_API_URL:?Set FRONTEND_API_URL in .env}
       REACT_APP_API_CUSTOM_PREFIX: ${FRONTEND_API_CUSTOM_PREFIX:-gruff-api/}
       REACT_APP_API_VERSION: ${FRONTEND_API_VERSION:-wp/v2/}
+      REACT_APP_FULLPAGE_LICENSE: ${FRONTEND_FULLPAGE_LICENSE:-}
       DANGEROUSLY_DISABLE_HOST_CHECK: "true"   # requests arrive through Caddy
       # If file-watching doesn't fire on macOS / Windows Docker Desktop, enable polling
       # (bind-mount inotify events don't cross the host boundary there):

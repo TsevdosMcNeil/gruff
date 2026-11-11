@@ -5,13 +5,12 @@ import GruffLoader from './../../GruffLoader'
 import { fetchProjects } from "./../../../actions/projectActionCreators";
 import { fetchMenu} from "./../../../actions/menuActionCreators";
 import { fetchOptions } from "./../../../actions/optionActionCreators";
+import { showLoader, hideLoader } from '../../../actions/transitionActionCreators';
 
 class Index extends React.Component {	
   constructor(props){
     super(props);
-    this.state = {
-      pageLoading:true
-    }
+    this.props.dispatch(showLoader());
   }
   componentDidMount(){
     Promise.all([
@@ -19,15 +18,13 @@ class Index extends React.Component {
       this.props.dispatch(fetchProjects()),
       this.props.dispatch(fetchOptions())
     ]).then(() => {
-      this.setState({
-        pageLoading:false
-      })
+      this.props.dispatch(hideLoader())
     });  
   }
   render() {
     return (
       <div className="gruff--Projects fullW">
-        {this.state.pageLoading &&
+        {this.props.loader.gruffLoader.isLoading &&
           <GruffLoader />
         }
         <Header {...this.props}/>

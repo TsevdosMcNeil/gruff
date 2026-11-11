@@ -7,13 +7,12 @@ import { fetchMenu} from "./../../../actions/menuActionCreators";
 import { fetchOptions } from "./../../../actions/optionActionCreators";
 import { fetchProjects } from "./../../../actions/projectActionCreators";
 import { fetchStories } from "./../../../actions/storyActionCreators";
+import { showLoader, hideLoader } from '../../../actions/transitionActionCreators';
 
 class Index extends React.Component {	
   constructor(props){
     super(props);
-    this.state = {
-      pageLoading:true
-    }
+    this.props.dispatch(showLoader());
   }
   componentDidMount(){
     Promise.all([
@@ -22,15 +21,13 @@ class Index extends React.Component {
       this.props.dispatch(fetchOptions()),
       this.props.dispatch(fetchProjects())
     ]).then(() => {
-      this.setState({
-        pageLoading:false
-      })
+      this.props.dispatch(hideLoader())
     });
   }
   render() {
     return (
-      <div className="gruff--Stories fullW">
-        {this.state.pageLoading &&
+      <div className="gruff--Stories menusmoke fullW">
+        {this.props.loader.gruffLoader.isLoading &&
           <GruffLoader />
         } 
         <Header {...this.props}/>

@@ -110,10 +110,20 @@ Then log in at `https://gruff.localhost:8466/api/GR0319` and save **Settings →
 
 ## Production build
 
-`frontend/package.json` has `"homepage": "http://sundewlabs.com/gruff/html"`, so `npm run build` makes a build that expects to be served from `/gruff/html/`. For the live site at the domain root, set `"homepage": "/"` before building, and build with the live API URL:
+`frontend/package.json` has `"homepage": "/"`, so the build is served from the domain root. Build with the live API URL:
 
 ```bash
-docker compose run --rm -e REACT_APP_API_URL=http://gruffarchitects.com/api/wp-json/ node npm run build
+docker compose run --rm -e REACT_APP_API_URL=https://gruffarchitects.com/api/wp-json/ node npm run build
 ```
 
-The `-e` overrides only the API URL for that build; the prefix and version still come from `.env`. The build ends up in `frontend/build/`.
+The `-e` overrides only the API URL for that build; the prefix, version and fullPage licence still come from `.env`. The build ends up in `frontend/build/`.
+
+## Where `frontend/src` came from
+
+The source the original developer handed over was an older version than the one running on gruffarchitects.com (it had a combined `/practice-people` page, no `/privacy-notice`, no 404 page, and older styles). `frontend/src` was rebuilt from the source maps of the live build (`static/js/main.dd4ccf40.js.map` and `static/css/main.bc0eacd3.css.map`), so it matches the live site:
+
+- JS: recovered file-for-file from the source map.
+- CSS: `src/assets/css/style.css` is the live compiled (minified) CSS. The old `.scss` partials did not match live and were dropped, so edit `style.css` directly.
+- Images and fonts: taken from the live build's `static/media/`.
+- `src/lib/fullpage.offsetSections.min.js` is the paid fullPage.js *Offset Sections* extension, which isn't on npm (the original developer had copied it into `node_modules`). It is licensed to this site and must not be redistributed, so keep this repository private.
+- `package.json`: `@fullpage/react-fullpage` pinned to 0.1.14 (the version live uses) and `react-owl-carousel2` added (used by the Practice carousel).

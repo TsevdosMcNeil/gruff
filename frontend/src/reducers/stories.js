@@ -1,5 +1,6 @@
 const initialState = {
     data:[],
+    all:[],
     loading: true,
     error: null
 };
@@ -17,6 +18,7 @@ export default function fetchStories(state = initialState,action){
                 ...state,
                 loading: false,
                 data:action.payload.stories,
+                all:action.payload.all
             };
     
         case 'FETCH_STORIES_FAILURE':
@@ -25,6 +27,7 @@ export default function fetchStories(state = initialState,action){
                 loading: false,
                 error: action.payload.error,
                 data:[],
+                all:[]
             };
     
         default:

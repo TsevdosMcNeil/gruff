@@ -1,5 +1,8 @@
 const initialState = {
-    data:[],
+    all:[],
+    featured:[],
+    others:[],
+    all_others:[],
     recent_projects:[],
     loading: true,
     error: null
@@ -17,7 +20,10 @@ export default function fetchProjects(state = initialState,action){
             return {
                 ...state,
                 loading: false,
-                data:action.payload.projects,
+                all:action.payload.all,
+                featured:action.payload.featured,
+                others:action.payload.others,
+                all_others:action.payload.all_others,
                 recent_projects:action.payload.recent_projects,
             };
     
@@ -26,7 +32,10 @@ export default function fetchProjects(state = initialState,action){
                 ...state,
                 loading: false,
                 error: action.payload.error,
-                data:[],
+                all:[],
+                featured:[],
+                others:[],
+                all_others:[],
                 recent_projects:[]
             };
     

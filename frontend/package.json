@@ -1,10 +1,10 @@
 {
   "name": "gruff",
-  "homepage": "http://sundewlabs.com/gruff/html",
+  "homepage": "/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@fullpage/react-fullpage": "^0.1.9",
+    "@fullpage/react-fullpage": "0.1.14",
     "jquery": "^3.3.1",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
@@ -12,6 +12,7 @@
     "react-masonry-css": "^1.0.11",
     "react-materialize": "^2.4.5",
     "react-owl-carousel": "^2.2.0",
+    "react-owl-carousel2": "^0.3.0",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
     "react-router-redux": "^4.0.8",

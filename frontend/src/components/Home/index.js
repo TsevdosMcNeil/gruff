@@ -6,13 +6,12 @@ import { fetchMenu} from "./../../actions/menuActionCreators";
 import { fetchOptions } from "./../../actions/optionActionCreators";
 import { fetchPosts } from "./../../actions/postActionCreators";
 import { fetchStories } from "./../../actions/storyActionCreators";
+import { showLoader, hideLoader } from '../../actions/transitionActionCreators';
 
 class Index extends React.Component {	
   constructor(props){
     super(props);
-    this.state = {
-      pageLoading:true
-    }
+    this.props.dispatch(showLoader());
   }
   componentDidMount(){
     Promise.all([
@@ -21,16 +20,14 @@ class Index extends React.Component {
       this.props.dispatch(fetchPosts('home-sliders')),
       this.props.dispatch(fetchStories())
     ]).then(() => {
-        this.setState({
-          pageLoading:false
-        })
+        this.props.dispatch(hideLoader())
     });  
   }
 
   render() {
     return (
       <div className="gruff--Home fullW">
-        {this.state.pageLoading &&
+        {this.props.loader.gruffLoader.isLoading &&
           <GruffLoader />
         } 
         <Header {...this.props}/>

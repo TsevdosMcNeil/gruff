@@ -15,6 +15,7 @@ export const loadDetailsSuccess = (data) => ({
     payload:{
         url:data.url,
         redirect:true,
+        clkClass:'is-projDtlsLoading',
     }
 });
 
@@ -28,4 +29,12 @@ export const detailsLoadedSuccess = (data) => ({
 export const fetchTransitionError = error => ({
     type: 'FETCH_TRANSITION_FAILURE',
     payload: { error }
+});
+
+export const showLoader = () => ({
+    type: 'SHOW_LOADER'
+});
+
+export const hideLoader = () => ({
+    type: 'HIDE_LOADER'
 });

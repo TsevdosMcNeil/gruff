@@ -7,6 +7,47 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [0.2.0] - 2026-11-11
+
+The front end now runs the same code as gruffarchitects.com. The source the original developer handed over was an older version than the live site, so `frontend/src` was rebuilt from the source maps of the live build (`main.dd4ccf40.js.map` and `main.bc0eacd3.css.map`).
+
+### Added
+
+- Pages that exist on the live site but were missing from the old source:
+  - separate `/practice` and `/people` pages (Practice layouts 1–5, carousel, awards)
+  - `/privacy-notice`
+  - a 404 page for unknown addresses
+- The live menu, with the Projects sub-menu (grid / list) and the secondary menu.
+- The page loader, awards and testimonial data (`awardActionCreators`, `reducers/awards.js`, `reducers/loader.js`, `reducers/testimonial.js`).
+- `src/lib/fullpage.offsetSections.min.js`: the paid fullPage.js *Offset Sections* extension, recovered from the live build. It isn't on npm, and the original developer had copied it into `node_modules` by hand.
+- `react-owl-carousel2` dependency (used by the home banner).
+- `FRONTEND_FULLPAGE_LICENSE` in `.env` / `.env.example`, passed to React as `REACT_APP_FULLPAGE_LICENSE`.
+- `docs/HEADLESS.md`: a section on where `frontend/src` came from.
+
+### Changed
+
+- `frontend/src` replaced with the live source. Routes now match the live site: `/practice` and `/people` instead of `/practice-people`.
+- `src/assets/css/style.css` is now the live compiled (minified) CSS. Edit it directly.
+- Images and fonts in `src/assets/` taken from the live build's `static/media/`. `src/assets/img` stays in `.gitignore`, so copy it in by hand.
+- `@fullpage/react-fullpage` pinned to `0.1.14`, the version the live site uses.
+- `frontend/package.json` `homepage` set to `/`, so production builds are served from the domain root.
+- `frontend/package-lock.json` regenerated.
+- Production build docs use the `https` live API URL.
+
+### Removed
+
+- The old combined `PracticePeople` container and components.
+- The old `.scss` partials (`_breakpoints`, `_color`, `_fonts`, `_mixin`, `_owl`, `_reset`, `style.scss`), which didn't match the live styles.
+- The temporary 0.1.0 workarounds in `Layout.js` (redirects from `/practice` and `/people`) and `Menu.js` (flattening the menu data).
+
+### Fixed
+
+- The 0.1.0 known issues: `menu.map is not a function`, the `sundewlabs.com/gruff/html` homepage, and source that didn't match the API's data shapes.
+
+### Security
+
+- The repository should be private: it contains the licensed fullPage extension, and the docs show the hidden CMS login path.
+
 ## [0.1.1] - 2026-11-10
 
 - Wordpress template
@@ -47,5 +88,7 @@ Starting point: the existing Gruff site (React front end + WordPress API) runnin
 - `frontend/package.json` has `"homepage": "http://sundewlabs.com/gruff/html"`, so production builds expect to be served from `/gruff/html/`.
 - The front end's source doesn't match the API's current data shapes, so the live site may run a newer build than this code. Other components may need the same kind of fix as `Menu.js`.
 
-[Unreleased]: https://github.com/pablorica/gruff/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/pablorica/gruff/releases/tag/v0.1.0
+[Unreleased]: https://github.com/TsevdosMcNeil/gruff/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/TsevdosMcNeil/gruff/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/TsevdosMcNeil/gruff/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/TsevdosMcNeil/gruff/releases/tag/v0.1.0
