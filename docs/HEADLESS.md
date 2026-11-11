@@ -4,9 +4,9 @@ Same layout as the live site, on one origin:
 
 | URL | Serves | Live equivalent |
 |---|---|---|
-| `https://gruff.localhost:8466/` | React front end (CRA dev server, hot reload) | `http://gruffarchitects.com/` |
-| `https://gruff.localhost:8466/api/wp-json/` | WordPress REST API | `http://gruffarchitects.com/api/wp-json` |
-| `https://gruff.localhost:8466/api/GR0319` | CMS login (Protect WP Admin) | `http://gruffarchitects.com/api/GR0319` |
+| `https://gruff.localhost:8466/` | React front end (CRA dev server, hot reload) | `https://gruffarchitects.com/` |
+| `https://gruff.localhost:8466/api/wp-json/` | WordPress REST API | `https://gruffarchitects.com/api/wp-json` |
+| `https://gruff.localhost:8466/api/GR0319` | CMS login (Protect WP Admin) | `https://gruffarchitects.com/api/GR0319` |
 | `https://pma.gruff.localhost:8466/` | phpMyAdmin | — |
 
 Because the front end and the API share one origin, no CORS setup is needed.
@@ -97,7 +97,7 @@ cd ~/Dockers/gruff
 #    (the mysql container already has the credentials in its environment)
 docker compose exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u"$MYSQL_USER" "$MYSQL_DATABASE"' < gruff-live.sql
 
-# 3. Replace the live URLs (try both schemes; the live site runs on http)
+# 3. Replace the live URLs (both schemes: the live site runs on https, but older content may still hold http:// URLs)
 docker compose run --rm wpcli search-replace 'http://gruffarchitects.com/api'  'https://gruff.localhost:8466/api' --all-tables --skip-columns=guid
 docker compose run --rm wpcli search-replace 'https://gruffarchitects.com/api' 'https://gruff.localhost:8466/api' --all-tables --skip-columns=guid
 

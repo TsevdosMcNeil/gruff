@@ -7,11 +7,22 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [0.3.2] - 2026-11-11
+
+### Fixed
+
+- `frontend/public/index.html` now has the `<head>` of the live site, which the repo version was missing, so deploying the repo build would have dropped them: description, canonical, Open Graph and Twitter tags, Pinterest verification, Google Analytics, Organization JSON-LD and the `#817e7d` theme colour. Every gruffarchitects.com URL in it is `https://` (it was `http://` on the live site), and `twitter:site` / `twitter:creator` are `@gruffarchitects`.
+- Docs: the live site runs on https (README, HEADLESS.md, STAGING.md). The README production build uses the relative API URL `/api/wp-json/`, like staging; an absolute `http://` URL would be blocked as mixed content on the https site.
+
 ## [0.3.1] - 2026-11-11
 
 ### Added
 
 - `deploy-staging.sh`: deploys local to staging in one command. It warns about uncommitted or unpushed changes, builds the front end, syncs files, theme and plugins, recreates the containers when their config changed, and runs the post-deploy checks. See docs/STAGING.md.
+
+### Changed
+
+- Staging deploys work with macOS's own rsync (`openrsync`, no `--chown`): files are synced with `--no-owner --no-group`, then the server's rsync sets the owner to `www-data` (docs/STAGING.md, step 3b). Homebrew's rsync is no longer needed.
 
 ## [0.3.0] - 2026-11-11
 

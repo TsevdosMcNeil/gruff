@@ -1,15 +1,15 @@
 # Gruff Architects
 
-Website for [Gruff Architects](http://gruffarchitects.com/): headless WordPress for content, React front end.
+Website for [Gruff Architects](https://gruffarchitects.com/): headless WordPress for content, React front end.
 
-[![version](https://img.shields.io/badge/version-0.3.1-blue.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/version-0.3.2-blue.svg)](https://semver.org)
 
 
 | Part | Technology | Live URL |
 |---|---|---|
-| Front end | React 16 (Create React App, `react-scripts` 1.x), Redux, React Router 4 | `http://gruffarchitects.com/` |
-| API | WordPress REST API (`wp/v2` + custom `gruff-api` routes), ACF PRO | `http://gruffarchitects.com/api/wp-json/` |
-| CMS | WordPress admin, login path hidden by [Protect WP Admin](https://wordpress.org/plugins/protect-wp-admin/) | `http://gruffarchitects.com/api/<login-slug>` |
+| Front end | React 16 (Create React App, `react-scripts` 1.x), Redux, React Router 4 | `https://gruffarchitects.com/` |
+| API | WordPress REST API (`wp/v2` + custom `gruff-api` routes), ACF PRO | `https://gruffarchitects.com/api/wp-json/` |
+| CMS | WordPress admin, login path hidden by [Protect WP Admin](https://wordpress.org/plugins/protect-wp-admin/) | `https://gruffarchitects.com/api/<login-slug>` |
 
 The CMS login slug isn't written here on purpose: Protect WP Admin only works while it stays private. Ask the team for it.
 
@@ -132,6 +132,7 @@ docker compose exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u"$MYSQL_
 
 # Live URLs -> local URLs. Replace the URL with /api, not the bare domain,
 # or email addresses like mail@gruffarchitects.com get changed too.
+# The live site runs on https, but older content may still hold http:// URLs, so replace both.
 docker compose run --rm wpcli search-replace 'http://gruffarchitects.com/api'  'https://gruff.localhost:8466/api' --all-tables --skip-columns=guid
 docker compose run --rm wpcli search-replace 'https://gruffarchitects.com/api' 'https://gruff.localhost:8466/api' --all-tables --skip-columns=guid
 ```
@@ -152,12 +153,12 @@ Never commit the database dump: add `*.sql` to `.gitignore`.
 ## Production build
 
 ```bash
-docker compose run --rm -e REACT_APP_API_URL=http://gruffarchitects.com/api/wp-json/ node npm run build
+docker compose run --rm -e REACT_APP_API_URL=/api/wp-json/ node npm run build
 ```
 
-The build ends up in `frontend/build/`. `-e` overrides only the API URL; the prefix and version come from `.env`.
+The build ends up in `frontend/build/`. `-e` overrides only the API URL; the prefix and version come from `.env`. The API URL is relative, so the same build works on staging and on the live site, and never calls the API over http from an https page (browsers block that as mixed content).
 
-Before building, check `"homepage"` in `frontend/package.json`. It's set to `http://sundewlabs.com/gruff/html`, so the build expects to be served from `/gruff/html/`. For the live site at the domain root, set it to `"/"`.
+`"homepage"` in `frontend/package.json` is `"/"`: the build is served from the domain root.
 
 `frontend/public/.htaccess` (copied into the build) sends every unknown path to `index.html`, so React Router handles routes like `/project/<slug>` on Apache.
 

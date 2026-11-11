@@ -215,7 +215,8 @@ cd /data/webs/gruff
 docker compose exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mariadb-dump -uroot "$MYSQL_DATABASE"' | gzip > ~/gruff-staging-$(date +%Y%m%d).sql.gz
 docker compose exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u"$MYSQL_USER" "$MYSQL_DATABASE"' < /tmp/gruff-live.sql
 
-# 3. Live URLs -> staging URLs (the live site runs on http; do both schemes, only the /api URL)
+# 3. Live URLs -> staging URLs (only the /api URL). The live site runs on https, but older
+#    content may still hold http:// URLs, so do both schemes
 docker compose run --rm wpcli search-replace 'http://gruffarchitects.com/api'  'https://beta.gruff.tm-studio.co.uk/api' --all-tables --skip-columns=guid
 docker compose run --rm wpcli search-replace 'https://gruffarchitects.com/api' 'https://beta.gruff.tm-studio.co.uk/api' --all-tables --skip-columns=guid
 
