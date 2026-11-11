@@ -93,7 +93,7 @@ cd ~/Dockers/gruff
 # 1. Theme + plugins from the live server
 #    -> wordpress/wp-content/themes/<theme>/ and wordpress/wp-content/plugins/
 
-# 2. Database. WORDPRESS_TABLE_PREFIX in .env must match the dump's prefix.
+# 2. Database. The live prefix is pr71_ (WORDPRESS_TABLE_PREFIX in .env).
 #    (the mysql container already has the credentials in its environment)
 docker compose exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u"$MYSQL_USER" "$MYSQL_DATABASE"' < gruff-live.sql
 

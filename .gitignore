@@ -165,8 +165,9 @@ yarn-error.log*
 !docs/
 
 
-# track uploads.ini
+# track uploads.ini and the database settings
 !uploads.ini
+!mysql-lowmem.cnf
 
 # track example files, if they exist
 !*.example

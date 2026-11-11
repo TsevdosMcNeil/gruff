@@ -7,6 +7,21 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [0.2.1] - 2026-11-11
+
+Local now runs the same database server and table prefix as the live site, so local, staging and production share one stack.
+
+### Changed
+
+- Database: `mysql:8.0.36` → `mariadb:10.11` (the live server runs 10.11.19-MariaDB). New Docker volume `mariadb_data`; the old `mysql_data` volume is no longer used and can be removed once the new database is checked.
+- Database healthcheck uses MariaDB's own `healthcheck.sh`. Removed the MySQL-only `--default-authentication-plugin` flag.
+- Table prefix `wp_` → `pr71_` (the live prefix) in `.env.example`, for every environment.
+- `docker-compose.remote.yml`: staging only overrides ports, mounts the React build at the web root and puts phpMyAdmin in the `tools` profile. Images and PHP limits come from `docker-compose.yml`.
+
+### Added
+
+- `mysql-lowmem.cnf`: low-memory database settings, mounted in local and staging.
+
 ## [0.2.0] - 2026-11-11
 
 The front end now runs the same code as gruffarchitects.com. The source the original developer handed over was an older version than the live site, so `frontend/src` was rebuilt from the source maps of the live build (`main.dd4ccf40.js.map` and `main.bc0eacd3.css.map`).

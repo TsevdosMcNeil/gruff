@@ -40,20 +40,24 @@ services:
         # CRA dev server
         npm start
   mysql:
-    # image: mysql:latest -> do not use latest to avoid unexpected breaking changes, pin to a specific version
-    image: mysql:8.0.36
+    # Same database server as the live site (123reg: 10.11.19-MariaDB). Pinned, never "latest".
+    # The service keeps the name "mysql" so MYSQL_HOST, phpMyAdmin and the docs don't change.
+    image: mariadb:10.11
     container_name: ${MYSQL_CONTAINER}
-    command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
-    volumes: ## Important to make the database persistent and avoid data loss on container restart. Also allows pre-seeding with an existing database if needed.
-      - mysql_data:/var/lib/mysql
+    volumes:
+      # New volume name: MySQL 8 data files can't be opened by MariaDB, so the old
+      # mysql_data volume is left untouched (as a backup) and MariaDB starts empty.
+      - mariadb_data:/var/lib/mysql
+      # Low-memory settings, shared by local and staging (the server has little RAM)
+      - ./mysql-lowmem.cnf:/etc/mysql/conf.d/zz-lowmem.cnf:ro
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    healthcheck: ## Add a DB healthcheck (prevents race condition on first boot)
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+    healthcheck: ## Add a DB healthcheck (prevents race condition on first boot)
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -168,5 +172,5 @@ services:
 
 
 volumes:
-  mysql_data: ## Persistent storage for MySQL data to prevent data loss on container restart and allow pre-seeding with existing database if needed
+  mariadb_data: ## Persistent storage for the MariaDB data, so the database survives container restarts
   frontend_node_modules: ## Front-end node_modules kept in a container-only volume (off the host bind mount) for speed + correct arch

@@ -40,7 +40,7 @@ Node, Composer and WP-CLI don't need to be installed locally; they run in contai
 | `caddy` | `caddy:2` | HTTPS on port `8466`. Routes `/api/*` to WordPress and everything else to React. Redirects `http://` to `https://`. |
 | `node` | `node:22-alpine` | React dev server, from `./frontend` |
 | `wordpress` | `wordpress:php8.5-apache` | WordPress, installed in `/var/www/html/api` inside the container |
-| `mysql` | `mysql:8.0.36` | Database (Docker volume `mysql_data`) |
+| `mysql` | `mariadb:10.11` | Database, same version as the live site (Docker volume `mariadb_data`, settings in `mysql-lowmem.cnf`) |
 | `phpmyadmin` | `phpmyadmin:5.2` | Database admin |
 | `wpcli` | `wordpress:cli-php8.5` | WP-CLI, run on demand |
 
@@ -119,7 +119,7 @@ The front end depends on data that only exists in the live backend:
 You need the live theme and plugins (`wp-content/themes`, `wp-content/plugins`) and a database dump.
 
 ```bash
-# Database (WORDPRESS_TABLE_PREFIX in .env must match the dump's prefix)
+# Database (the live prefix is pr71_, set in WORDPRESS_TABLE_PREFIX in .env)
 docker compose exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u"$MYSQL_USER" "$MYSQL_DATABASE"' < gruff-live.sql
 
 # Live URLs -> local URLs. Replace the URL with /api, not the bare domain,
